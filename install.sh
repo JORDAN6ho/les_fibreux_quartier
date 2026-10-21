@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -e
+ROLE="${1:-}"
+if [ "$ROLE" != "serveur" ] && [ "$ROLE" != "client" ]; then
+    echo "Usage : bash install.sh serveur   ou   bash install.sh client"
+    exit 1
+fi
+if [ "$ROLE" = "client" ]; then
+    PAQUETS="python3 python3-venv python3-pip libxcb-cursor0 libxkbcommon-x11-0 libegl1 libgl1 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 libxcb-xkb1"
+else
+    PAQUETS="python3 python3-venv"
+fi
+sudo apt-get update
+sudo apt-get install -y $PAQUETS
+if ! python3 -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
+    echo "Python 3.10 ou plus est requis (version actuelle : $(python3 --version))"
+    exit 1
+fi
+python3 -m venv venv
+if [ "$ROLE" = "client" ]; then
+    ./venv/bin/pip install -r requirements.txt
+fi
+echo "Installation terminée pour le rôle : $ROLE"

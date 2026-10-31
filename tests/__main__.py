@@ -1,11 +1,12 @@
 """Lance tous les tests d'un coup : python3 -m tests (depuis la racine du dépôt)."""
 import time
 
-from tests import (test_base, test_carte, test_commandes, test_config, test_etat, test_feux, test_protocole,
+from tests import (test_base, test_carte, test_commandes, test_config, test_etat, test_feux, test_outils,
+                   test_protocole,
                    test_reseau, test_simulation)
 
 # Du plus rapide au plus long : une erreur simple apparaît tout de suite
-for module in (test_protocole, test_config, test_base, test_carte, test_feux, test_commandes, test_etat, test_reseau,
+for module in (test_protocole, test_config, test_base, test_outils, test_carte, test_feux, test_commandes, test_etat, test_reseau,
                test_simulation):
     debut = time.time()
     print(f"--- {module.__name__}")

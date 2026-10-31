@@ -47,9 +47,10 @@ class ServeurTCP:
                 conn, adresse = self.socket.accept()
             except OSError:
                 break
-            logging.info("client connecté : %s:%s", *adresse[:2])
             with self.verrou:
                 self.clients.append(conn)
+                nombre = len(self.clients)
+            logging.info("client connecté : %s:%s (%d client(s) connecté(s))", *adresse[:2], nombre)
             # Un thread par client, pour que chacun soit servi sans bloquer les autres
             threading.Thread(target=self.gerer_client, args=(conn,), daemon=True).start()
 
@@ -83,7 +84,7 @@ class ServeurTCP:
         with self.verrou:
             if conn in self.clients:
                 self.clients.remove(conn)
-                logging.info("client déconnecté")
+                logging.info("client déconnecté (%d client(s) restant(s))", len(self.clients))
         conn.close()
 
     def envoyer(self, conn, message):

@@ -31,3 +31,8 @@ class Base:
                  int(t["prio"]), t["duree"], t["est_adapt"], t["est_fixe"], t["recalculs"], json.dumps(t["route"])),
             )
             self.connexion.commit()
+
+    def fermer(self):
+        """Ferme le fichier de base (appelé à l'arrêt du serveur)."""
+        with self.verrou:
+            self.connexion.close()

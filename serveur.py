@@ -25,6 +25,8 @@ def main():
     except KeyboardInterrupt:
         arret.set()
         serveur.arreter()
+        # Ferme proprement stats.db pour ne pas laisser d'écriture en suspens
+        base.fermer()
         logging.info("serveur arrêté")
 
 

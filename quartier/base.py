@@ -36,3 +36,10 @@ class Base:
         """Ferme le fichier de base (appelé à l'arrêt du serveur)."""
         with self.verrou:
             self.connexion.close()
+
+    def lister_trajets(self):
+        """Retourne les trajets enregistrés, du plus ancien au plus récent, sous forme de dictionnaires."""
+        with self.verrou:
+            curseur = self.connexion.execute("SELECT * FROM trajet_ambulance ORDER BY id")
+            colonnes = [c[0] for c in curseur.description]
+            return [dict(zip(colonnes, ligne)) for ligne in curseur.fetchall()]

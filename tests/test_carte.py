@@ -42,7 +42,6 @@ def main():
     assert debut[0] < 1 and fin[0] > 1199, "le trajet E3 vers E4 traverse toute la carte"
     assert t.indice(0) == 0 and t.indice(t.total) == 2
     print("OK : trajet continu, mis en cache")
-    # FIN
 
 
 if __name__ == "__main__":

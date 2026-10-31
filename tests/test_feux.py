@@ -43,7 +43,6 @@ def main():
     assert moyenne([]) is None and moyenne([None, 2, 4]) == 3
     assert freinage(0, 3) == 0 and freinage(1000, 3) == 3 and 0 < freinage(10, 3) < 3
     print("OK : moyenne et freinage")
-    # FIN
 
 
 if __name__ == "__main__":

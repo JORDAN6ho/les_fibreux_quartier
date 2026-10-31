@@ -108,7 +108,8 @@ Sur la VM 1, après `bash install.sh serveur`, `python3` suffit : le serveur n'u
 - **Bandeau rouge** « Il faut se serrer à droite ! » tant qu'une ambulance prioritaire est en route.
 - Ajout de voitures (limite de 24). Trafic automatique : coché, des voitures entrent seules (jusqu'à 14) ;
   décoché, plus aucune n'entre et le quartier se vide.
-- Les trajets d'ambulance terminés sont enregistrés dans `stats.db` (sqlite3) sur le serveur.
+- Les trajets d'ambulance terminés sont enregistrés dans `stats.db` (sqlite3) sur le serveur. Pour les afficher,
+  avec la moyenne avec et sans priorité : `python3 -m outils.trajets` (sur la VM 1, depuis le dossier).
 
 ## Tests
 
@@ -119,6 +120,11 @@ python3 -m tests.test_reseau        # échange client/serveur en TCP
 python3 -m tests.test_protocole     # messages JSON (aller-retour, accents, ligne illisible)
 python3 -m tests.test_config        # ordre de priorité de la configuration, port invalide
 python3 -m tests.test_base          # enregistrement et relecture des trajets dans sqlite3
+python3 -m tests.test_carte         # géométrie, graphe des routes, Dijkstra, trajets
+python3 -m tests.test_feux          # cycle des feux, forçage pour l'ambulance, tout-rouge de sécurité
+python3 -m tests.test_commandes     # commandes invalides refusées sans faire planter le serveur
+python3 -m tests.test_etat          # contenu du message d'état et statistiques
+python3 -m tests.test_outils        # outil d'affichage des trajets
 ```
 
 À lancer depuis le dossier `les_fibreux_quartier`, sur l'une ou l'autre VM : les tests n'utilisent que la
@@ -139,6 +145,7 @@ quartier/serveur_reseau.py  serveur TCP et boucle de simulation
 quartier/client_reseau.py   connexion du client (QThread)
 quartier/dessin.py, ihm.py  carte et fenêtre PyQt6
 quartier/protocole.py, config.py, base.py
+outils/trajets.py           affichage des trajets enregistrés dans stats.db
 AUTO_RECETTE.md             tableau de recette sur deux machines vierges (résultats des passes)
 GUIDE_RECETTE.md            guide pas à pas pour rejouer la recette
 tests/                      tests automatiques (bibliothèque standard), lancés par python3 -m tests

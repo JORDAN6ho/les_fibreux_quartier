@@ -1,0 +1,21 @@
+# Lance tous les tests à chaque push et à chaque pull request.
+# Les tests n'utilisent que la bibliothèque standard : pas besoin d'installer PyQt6.
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Tests du serveur et du protocole
+        run: python3 -m tests

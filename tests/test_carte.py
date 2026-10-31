@@ -25,6 +25,15 @@ def main():
     assert len(carte.VOIES) == 2 * len(carte.ROUTES)
     assert all(axe in ("ew", "ns") for _, axe in carte.ARRIVEES.values())
     print("OK : graphe des routes cohérent (deux sens par route)")
+    # Dijkstra : route directe si tout est fluide, contournement si la directe coûte trop, rien si tout est coupé
+    def cout(rid, sens):
+        return carte.LONGUEURS[(rid, sens)]
+    route, total = carte.itineraire("E3", "E4", cout)
+    assert [rid for rid, _ in route] == ["e3", "h34", "e4"] and total < math.inf
+    route, _ = carte.itineraire("E3", "E4", lambda rid, sens: math.inf if rid == "h34" else cout(rid, sens))
+    assert "c34" in [rid for rid, _ in route]
+    assert carte.itineraire("E3", "E4", lambda rid, sens: math.inf if rid == "e4" else cout(rid, sens)) == (None, math.inf)
+    print("OK : Dijkstra (direct, contournement, aucun chemin)")
     # FIN
 
 

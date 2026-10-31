@@ -33,6 +33,12 @@ def main():
     n.forcage = {"axe": "ew", "mode": "onde_verte", "pret": False}
     assert n.etat() == {"ew": "vert", "ns": "rouge"}
     print("OK : forçage des feux (dégagement et onde verte)")
+    # Après une urgence : tout-rouge de sécurité, puis reprise du cycle au début
+    n = Noeud(200)
+    n.retour = 3
+    assert couleurs(n, 3) == [{"ew": "rouge", "ns": "rouge"}] * 3
+    assert n.t == 0 and n.etat() == {"ew": "vert", "ns": "rouge"}
+    print("OK : tout-rouge de sécurité puis reprise du cycle")
     # FIN
 
 

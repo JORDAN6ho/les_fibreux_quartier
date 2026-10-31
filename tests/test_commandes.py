@@ -18,6 +18,10 @@ def main():
         assert reponse == {"type": "erreur", "message": attendu}, (commande, reponse)
     assert q.executer({"nom": "urgence", "depart": "E3", "arrivee": "E4", "gravite": 7})["message"] \
         == "gravité invalide (1 à 3)"
+    assert q.executer({"nom": "route", "route": "h12", "etat": "glissante"})["message"] == "route ou état inconnu"
+    assert q.executer({"nom": "route", "route": "h12", "etat": "dense"}) is None
+    assert q.etats_routes["h12"] == "dense"
+
     print("OK : commandes invalides refusées avec un message d'erreur")
 
 

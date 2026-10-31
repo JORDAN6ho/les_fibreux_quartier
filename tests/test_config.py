@@ -35,6 +35,13 @@ def main():
     assert lire(["--hote", "192.168.1.42", "--port", "6000"], ini) == ("192.168.1.42", 6000)
     assert lire([], ini, {"CARREFOUR_HOTE": "1.2.3.4"}) == ("10.0.2.3", 5050), "config.ini passe avant l'environnement"
     assert lire([], "[reseau]\n", {"CARREFOUR_HOTE": "1.2.3.4", "CARREFOUR_PORT": "7000"}) == ("1.2.3.4", 7000)
+    for mauvais in ("abc", "0", "70000"):
+        try:
+            lire(["--hote", "10.0.2.3"], f"[reseau]\nport = {mauvais}\n")
+        except SystemExit:
+            pass
+        else:
+            raise AssertionError(f"le port {mauvais} aurait dû être refusé")
     print("OK : configuration (arguments, puis config.ini, puis environnement)")
 
 

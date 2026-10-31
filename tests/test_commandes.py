@@ -25,6 +25,11 @@ def main():
     assert q.executer({"nom": "auto", "valeur": False}) is None and q.trafic_auto is False
     assert q.executer({"nom": "auto", "valeur": True}) is None and q.trafic_auto is True
 
+    q.trafic_auto = False
+    ajouts = [q.executer({"nom": "ajout"}) for _ in range(200)]
+    assert q.compter("voiture") <= 24, "la limite de 24 voitures doit être respectée"
+    assert {"type": "erreur", "message": "limite de voitures atteinte"} in ajouts or q.compter("voiture") < 24
+
     print("OK : commandes invalides refusées avec un message d'erreur")
 
 

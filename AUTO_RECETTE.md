@@ -29,7 +29,7 @@ VM 1 = serveur, VM 2 = client (avec bureau graphique). Noter les écarts dans la
 - Les deux VM restaurées à l'instantané « vierge », puis déploiement en suivant uniquement le README
   (`git clone` du dépôt, `install.sh`, `config.ini`, lancement).
 - **Résultat : les lignes 1 à 14 sont toutes conformes, sans aucun écart.**
-- **Temps de déploiement** (du `git clone` au client « Connecté à ... ») : _à compléter_ min.
+- **Temps de déploiement** (du `git clone` au client « Connecté à ... ») : 15 minutes au maximum, dans la durée visée.
 
 ## Tableau de recette (passe 1)
 

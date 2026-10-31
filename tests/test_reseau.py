@@ -25,6 +25,7 @@ def main():
     threading.Thread(target=boucle_simulation, args=(quartier, serveur, arret), daemon=True).start()
     time.sleep(0.3)
     with socket.create_connection((hote, port), timeout=5) as conn, conn.makefile("rb") as flux:
+        conn.sendall(b"[1, 2]\n")
         conn.sendall(encoder({"type": "commande", "nom": "urgence", "depart": "E3", "arrivee": "E3",
                               "gravite": 1, "prioritaire": True}))
         conn.sendall(encoder({"type": "commande", "nom": "urgence", "depart": "E3", "arrivee": "E4",
@@ -39,7 +40,7 @@ def main():
                 break
     arret.set()
     serveur.arreter()
-    assert erreurs == ["départ ou arrivée invalide"], erreurs
+    assert erreurs == ["message illisible", "départ ou arrivée invalide"], erreurs
     assert etat and etat["ambulances"][0]["prio"]
     print("OK : erreur renvoyée pour la commande invalide, ambulance reçue dans l'état :", etat["ambulances"][0]["route"])
 

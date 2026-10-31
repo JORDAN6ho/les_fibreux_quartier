@@ -29,7 +29,7 @@ VM 1 = serveur, VM 2 = client (avec bureau graphique). Noter les écarts dans la
 - Les deux VM restaurées à l'instantané « vierge », puis déploiement en suivant uniquement le README
   (`git clone` du dépôt, `install.sh`, `config.ini`, lancement).
 - **Résultat : les lignes 1 à 14 sont toutes conformes, sans aucun écart.**
-- **Temps de déploiement** (du `git clone` au client « Connecté à ... ») : _à compléter_ min.
+- **Temps de déploiement** (du `git clone` au client « Connecté à ... ») : 15 minutes au maximum, dans la durée visée.
 
 ## Tableau de recette (passe 1)
 
@@ -51,6 +51,9 @@ VM 1 = serveur, VM 2 = client (avec bureau graphique). Noter les écarts dans la
 | 12 | VM 1 et 2 | Ctrl+C sur le serveur ; le client affiche « Connexion perdue ». Relancer le serveur, fermer puis relancer le client | Redémarrage propre, le client se reconnecte | OK |
 | 13 | VM 2 | `python3 -m tests.test_simulation` puis `python3 -m tests.test_reseau` (depuis le dossier) | Les tests se terminent sans erreur | OK |
 | 14 | VM 1 | `python3 -c "import sqlite3; print(*sqlite3.connect('stats.db').execute('select * from trajet_ambulance'), sep=chr(10))"` | Les trajets d'ambulance sont listés | OK |
+
+Depuis la version 1.1, la ligne 14 peut aussi se faire avec `python3 -m outils.trajets`, qui affiche les
+trajets sous forme de tableau avec la moyenne avec et sans priorité.
 
 Problèmes fréquents : le client affiche « Connexion impossible » (mauvaise adresse, port 5050 bloqué par un
 pare-feu) ; erreur Qt « xcb » au lancement du client (relancer `bash install.sh client`).

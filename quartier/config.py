@@ -21,4 +21,11 @@ def lire_reseau(role, description):
     if not hote or not port:
         analyseur.error("adresse ou port introuvables : utiliser --hote et --port, config.ini "
                         "ou les variables CARREFOUR_HOTE et CARREFOUR_PORT")
-    return hote, int(port), fichier
+    # Un port mal tapé dans config.ini (lettres, 0, 99999) donne un message clair au lieu d'une trace Python
+    try:
+        port = int(port)
+    except ValueError:
+        analyseur.error(f"port invalide : « {port} » n'est pas un nombre")
+    if not 1 <= port <= 65535:
+        analyseur.error(f"port invalide : {port} (il doit être entre 1 et 65535)")
+    return hote, port, fichier

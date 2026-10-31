@@ -23,6 +23,24 @@ Deux programmes qui communiquent par sockets TCP (messages JSON, un par ligne) :
 Messages : `commande` (client vers serveur : lancer ou arrêter une urgence, route dense ou bloquée, ajout de
 voiture, trafic automatique), `etat` (avec l'itinéraire de chaque ambulance) (serveur vers client, 11 fois par seconde), `erreur` (commande refusée).
 
+## Protocole
+
+Un message JSON par ligne, encodé en UTF-8 (`quartier/protocole.py`). Exemples :
+
+```json
+{"type":"commande","nom":"urgence","depart":"E3","arrivee":"E4","gravite":2,"prioritaire":true}
+{"type":"commande","nom":"route","route":"h34","etat":"bloquee"}
+{"type":"commande","nom":"ajout"}
+{"type":"commande","nom":"auto","valeur":false}
+{"type":"commande","nom":"fin_urgence"}
+{"type":"erreur","message":"gravité invalide (1 à 3)"}
+```
+
+Le message `etat` contient : `tick`, `usagers` (position et angle de chaque véhicule), `feux` (couleur par axe
+pour Q1 à Q4), `routes` (état et nombre de véhicules par sens), `ambulances` (itinéraire), `strategies`,
+`serrer`, `compteurs` et `stats`. Une ligne illisible ou une commande invalide reçoit un message `erreur`, sans
+couper la connexion.
+
 ## Installation (environ 10 minutes par machine, Ubuntu 22.04 ou Debian 12)
 
 Sur chaque machine, l'utilisateur doit pouvoir utiliser `sudo`. Si `sudo true` répond « n'est pas dans le
@@ -90,17 +108,39 @@ Sur la VM 1, après `bash install.sh serveur`, `python3` suffit : le serveur n'u
 - **Bandeau rouge** « Il faut se serrer à droite ! » tant qu'une ambulance prioritaire est en route.
 - Ajout de voitures (limite de 24). Trafic automatique : coché, des voitures entrent seules (jusqu'à 14) ;
   décoché, plus aucune n'entre et le quartier se vide.
-- Les trajets d'ambulance terminés sont enregistrés dans `stats.db` (sqlite3) sur le serveur.
+- Les trajets d'ambulance terminés sont enregistrés dans `stats.db` (sqlite3) sur le serveur. Pour les afficher,
+  avec la moyenne avec et sans priorité : `python3 -m outils.trajets` (sur la VM 1, depuis le dossier).
 
 ## Tests
 
 ```bash
-python3 -m tests.test_simulation   # itinéraires, urgences, stabilité, priorité contre sans priorité
-python3 -m tests.test_reseau       # échange client/serveur en TCP
+python3 -m tests                    # tous les tests d'un coup (quelques secondes)
+python3 -m tests.test_simulation    # itinéraires, urgences, stabilité, priorité contre sans priorité
+python3 -m tests.test_reseau        # échange client/serveur en TCP
+python3 -m tests.test_protocole     # messages JSON (aller-retour, accents, ligne illisible)
+python3 -m tests.test_config        # ordre de priorité de la configuration, port invalide
+python3 -m tests.test_base          # enregistrement et relecture des trajets dans sqlite3
+python3 -m tests.test_carte         # géométrie, graphe des routes, Dijkstra, trajets
+python3 -m tests.test_feux          # cycle des feux, forçage pour l'ambulance, tout-rouge de sécurité
+python3 -m tests.test_commandes     # commandes invalides refusées sans faire planter le serveur
+python3 -m tests.test_etat          # contenu du message d'état et statistiques
+python3 -m tests.test_outils        # outil d'affichage des trajets
 ```
 
 À lancer depuis le dossier `les_fibreux_quartier`, sur l'une ou l'autre VM : les tests n'utilisent que la
-bibliothèque standard, le venv n'est pas nécessaire.
+bibliothèque standard, le venv n'est pas nécessaire. Ils tournent aussi automatiquement sur GitHub à chaque
+push (onglet *Actions*, fichier `.github/workflows/tests.yml`).
+
+## Dépannage
+
+| Symptôme | Solution |
+| --- | --- |
+| `... n'est pas dans le fichier sudoers` | `su -c "/usr/sbin/usermod -aG sudo $USER"`, puis se déconnecter et se reconnecter |
+| Client : « Connexion impossible » | Vérifier `hote_client` dans `config.ini`, puis `ping <adresse VM 1>` ; sous VirtualBox, mettre les deux VM en « Réseau NAT » commun |
+| Serveur : « impossible d'écouter » | Un ancien serveur tourne encore : `pkill -f serveur.py`, puis relancer |
+| Serveur : « port invalide » | Corriger `port` dans `config.ini` (nombre entre 1 et 65535) |
+| Client : erreur Qt « xcb » | Relancer `bash install.sh client`, ou essayer `QT_QPA_PLATFORM=xcb ./venv/bin/python client.py` |
+| `Could not get lock /var/lib/dpkg/lock-frontend` | Mises à jour automatiques d'Ubuntu en cours : attendre puis relancer |
 
 ## Structure
 
@@ -113,16 +153,18 @@ quartier/serveur_reseau.py  serveur TCP et boucle de simulation
 quartier/client_reseau.py   connexion du client (QThread)
 quartier/dessin.py, ihm.py  carte et fenêtre PyQt6
 quartier/protocole.py, config.py, base.py
+outils/trajets.py           affichage des trajets enregistrés dans stats.db
+CHANGELOG.md                historique des versions
 AUTO_RECETTE.md             tableau de recette sur deux machines vierges (résultats des passes)
 GUIDE_RECETTE.md            guide pas à pas pour rejouer la recette
-tests/                      tests automatiques (bibliothèque standard)
+tests/                      tests automatiques (bibliothèque standard), lancés par python3 -m tests
 ```
 
 ## Travailler sur le dépôt
 
 - `main` contient toujours une version qui s'installe et passe la recette.
 - Chaque évolution se fait sur une branche, puis arrive sur `main` par une pull request relue par l'autre membre.
-- Avant de fusionner : lancer les deux commandes de la section *Tests*.
+- Avant de fusionner : `python3 -m tests` doit passer (GitHub le vérifie aussi sur chaque pull request).
 - Messages de commit en français, qui disent ce qui change (« README : ajout de l'installation de git »).
 
 ## Fonctionnalités (voir le Bilan_Projet.pdf)

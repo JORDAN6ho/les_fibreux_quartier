@@ -47,9 +47,10 @@ class ServeurTCP:
                 conn, adresse = self.socket.accept()
             except OSError:
                 break
-            logging.info("client connecté : %s:%s", *adresse[:2])
             with self.verrou:
                 self.clients.append(conn)
+                nombre = len(self.clients)
+            logging.info("client connecté : %s:%s (%d client(s) connecté(s))", *adresse[:2], nombre)
             # Un thread par client, pour que chacun soit servi sans bloquer les autres
             threading.Thread(target=self.gerer_client, args=(conn,), daemon=True).start()
 
@@ -65,8 +66,17 @@ class ServeurTCP:
                         logging.warning("message illisible ignoré")
                         self.envoyer(conn, {"type": "erreur", "message": "message illisible"})
                         continue
+                    # Un JSON valide mais qui n'est pas un objet ([1, 2], "texte") n'a pas de .get()
+                    if not isinstance(message, dict):
+                        self.envoyer(conn, {"type": "erreur", "message": "message illisible"})
+                        continue
                     if message.get("type") == "commande":
                         reponse = self.quartier.executer(message)
+                        if message.get("nom") == "urgence" and not reponse:
+                            logging.info("urgence demandée : %s vers %s, gravité %s", message.get("depart"),
+                                         message.get("arrivee"), message.get("gravite"))
+                        elif reponse:
+                            logging.info("commande refusée : %s", reponse["message"])
                         if reponse:
                             self.envoyer(conn, reponse)
         # Client déconnecté brutalement : on le retire quand même
@@ -79,7 +89,7 @@ class ServeurTCP:
         with self.verrou:
             if conn in self.clients:
                 self.clients.remove(conn)
-                logging.info("client déconnecté")
+                logging.info("client déconnecté (%d client(s) restant(s))", len(self.clients))
         conn.close()
 
     def envoyer(self, conn, message):

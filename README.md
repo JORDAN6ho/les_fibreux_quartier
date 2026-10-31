@@ -131,8 +131,16 @@ python3 -m tests.test_outils        # outil d'affichage des trajets
 bibliothèque standard, le venv n'est pas nécessaire. Ils tournent aussi automatiquement sur GitHub à chaque
 push (onglet *Actions*, fichier `.github/workflows/tests.yml`).
 
-Si le serveur refuse de démarrer avec « impossible d'écouter », un ancien serveur tourne encore :
-`pkill -f serveur.py`, puis relancer.
+## Dépannage
+
+| Symptôme | Solution |
+| --- | --- |
+| `... n'est pas dans le fichier sudoers` | `su -c "/usr/sbin/usermod -aG sudo $USER"`, puis se déconnecter et se reconnecter |
+| Client : « Connexion impossible » | Vérifier `hote_client` dans `config.ini`, puis `ping <adresse VM 1>` ; sous VirtualBox, mettre les deux VM en « Réseau NAT » commun |
+| Serveur : « impossible d'écouter » | Un ancien serveur tourne encore : `pkill -f serveur.py`, puis relancer |
+| Serveur : « port invalide » | Corriger `port` dans `config.ini` (nombre entre 1 et 65535) |
+| Client : erreur Qt « xcb » | Relancer `bash install.sh client`, ou essayer `QT_QPA_PLATFORM=xcb ./venv/bin/python client.py` |
+| `Could not get lock /var/lib/dpkg/lock-frontend` | Mises à jour automatiques d'Ubuntu en cours : attendre puis relancer |
 
 ## Structure
 

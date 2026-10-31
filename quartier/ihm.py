@@ -4,6 +4,7 @@ from PyQt6.QtGui import QColor, QPainter, QPen
 from PyQt6.QtWidgets import (QCheckBox, QComboBox, QFrame, QGraphicsPathItem, QGraphicsScene, QGraphicsView,
                              QHBoxLayout, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget)
 
+from quartier import __version__
 from quartier.carte import ENTREES, trajet
 from quartier.client_reseau import ClientReseau
 from quartier.dessin import brosse, colorer_route, construire_decor, creer_vehicule, densite_route, trace
@@ -33,7 +34,7 @@ class FenetreQuartier(QMainWindow):
     def __init__(self, hote, port):
         """Construit la fenêtre puis lance le thread réseau."""
         super().__init__()
-        self.setWindowTitle(f"Les Fibreux - Quartier connecté ({hote}:{port})")
+        self.setWindowTitle(f"Les Fibreux - Quartier connecté {__version__} ({hote}:{port})")
         self.scene = QGraphicsScene()
         self.decor = construire_decor(self.scene, self.changer_route)
         self.vehicules, self.itineraires, self.etats_routes = {}, {}, {}

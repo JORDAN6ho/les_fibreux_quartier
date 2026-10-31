@@ -2,7 +2,7 @@
 
 Lancer depuis la racine : python -m tests.test_feux
 """
-from quartier.simulation import CYCLE, ORANGE, TOUT_ROUGE, VERT, Noeud
+from quartier.simulation import CYCLE, ORANGE, TOUT_ROUGE, VERT, Noeud, freinage, moyenne
 
 
 def couleurs(noeud, pas):
@@ -39,6 +39,10 @@ def main():
     assert couleurs(n, 3) == [{"ew": "rouge", "ns": "rouge"}] * 3
     assert n.t == 0 and n.etat() == {"ew": "vert", "ns": "rouge"}
     print("OK : tout-rouge de sécurité puis reprise du cycle")
+    # Petites fonctions : moyenne qui ignore les valeurs manquantes, freinage borné
+    assert moyenne([]) is None and moyenne([None, 2, 4]) == 3
+    assert freinage(0, 3) == 0 and freinage(1000, 3) == 3 and 0 < freinage(10, 3) < 3
+    print("OK : moyenne et freinage")
     # FIN
 
 

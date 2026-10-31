@@ -26,3 +26,9 @@ if [ "$ROLE" = "client" ]; then
     ./venv/bin/pip install -r requirements.txt
 fi
 echo "Installation terminée pour le rôle : $ROLE"
+# Rappel de la commande suivante, pour ne pas avoir à rouvrir le README
+if [ "$ROLE" = "serveur" ]; then
+    echo "Étape suivante : python3 serveur.py   (adresse à donner au client : $(hostname -I | cut -d' ' -f1))"
+else
+    echo "Étape suivante : mettre l'adresse du serveur dans hote_client de config.ini, puis ./venv/bin/python client.py"
+fi

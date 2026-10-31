@@ -2,12 +2,13 @@
 import time
 
 from tests import (test_base, test_carte, test_commandes, test_config, test_etat, test_feux, test_outils,
-                   test_protocole,
-                   test_reseau, test_simulation)
+                   test_protocole, test_reseau, test_simulation)
 
 # Du plus rapide au plus long : une erreur simple apparaît tout de suite
-for module in (test_protocole, test_config, test_base, test_outils, test_carte, test_feux, test_commandes, test_etat, test_reseau,
-               test_simulation):
+MODULES = (test_protocole, test_config, test_base, test_outils, test_carte, test_feux, test_commandes, test_etat,
+           test_reseau, test_simulation)
+
+for module in MODULES:
     debut = time.time()
     print(f"--- {module.__name__}")
     module.main()

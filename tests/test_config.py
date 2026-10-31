@@ -2,6 +2,8 @@
 
 Lancer depuis la racine : python -m tests.test_config
 """
+import contextlib
+import io
 import os
 import sys
 import tempfile
@@ -37,7 +39,9 @@ def main():
     assert lire([], "[reseau]\n", {"CARREFOUR_HOTE": "1.2.3.4", "CARREFOUR_PORT": "7000"}) == ("1.2.3.4", 7000)
     for mauvais in ("abc", "0", "70000"):
         try:
-            lire(["--hote", "10.0.2.3"], f"[reseau]\nport = {mauvais}\n")
+            # argparse écrit son message d'erreur sur stderr : on le capture pour garder une sortie lisible
+            with contextlib.redirect_stderr(io.StringIO()):
+                lire(["--hote", "10.0.2.3"], f"[reseau]\nport = {mauvais}\n")
         except SystemExit:
             pass
         else:

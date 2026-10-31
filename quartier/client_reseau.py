@@ -35,8 +35,13 @@ class ClientReseau(QThread):
         try:
             with self.socket.makefile("rb") as flux:
                 for ligne in flux:
+                    try:
+                        message = decoder(ligne)
+                    except ValueError:
+                        # Ligne abîmée : on l'ignore plutôt que de perdre la connexion
+                        continue
                     # emit() transmet le message au slot de la fenêtre, exécuté dans le thread de Qt
-                    self.message.emit(decoder(ligne))
+                    self.message.emit(message)
         except OSError:
             pass
         self.statut.emit("Connexion perdue")

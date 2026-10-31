@@ -52,6 +52,9 @@ VM 1 = serveur, VM 2 = client (avec bureau graphique). Noter les écarts dans la
 | 13 | VM 2 | `python3 -m tests.test_simulation` puis `python3 -m tests.test_reseau` (depuis le dossier) | Les tests se terminent sans erreur | OK |
 | 14 | VM 1 | `python3 -c "import sqlite3; print(*sqlite3.connect('stats.db').execute('select * from trajet_ambulance'), sep=chr(10))"` | Les trajets d'ambulance sont listés | OK |
 
+Depuis la version 1.1, la ligne 14 peut aussi se faire avec `python3 -m outils.trajets`, qui affiche les
+trajets sous forme de tableau avec la moyenne avec et sans priorité.
+
 Problèmes fréquents : le client affiche « Connexion impossible » (mauvaise adresse, port 5050 bloqué par un
 pare-feu) ; erreur Qt « xcb » au lancement du client (relancer `bash install.sh client`).
 Redéploiement à zéro : supprimer le dossier, refaire les étapes 2 à 8.

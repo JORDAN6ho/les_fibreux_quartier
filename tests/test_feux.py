@@ -24,6 +24,15 @@ def main():
     assert etats[VERT + ORANGE + TOUT_ROUGE] == {"ns": "vert", "ew": "rouge"}
     assert not any(e["ew"] != "rouge" and e["ns"] != "rouge" for e in etats), "jamais deux axes ouverts"
     print("OK : cycle normal des feux, jamais deux axes ouverts en même temps")
+    # Forçage pour une ambulance : le cycle est gelé ; en dégagement, vert seulement une fois le carrefour vidé
+    n = Noeud(10)
+    n.forcage = {"axe": "ns", "mode": "degagement", "pret": False}
+    assert couleurs(n, 50)[-1] == {"ns": "rouge", "ew": "rouge"} and n.t == 10
+    n.forcage["pret"] = True
+    assert n.etat() == {"ns": "vert", "ew": "rouge"}
+    n.forcage = {"axe": "ew", "mode": "onde_verte", "pret": False}
+    assert n.etat() == {"ew": "vert", "ns": "rouge"}
+    print("OK : forçage des feux (dégagement et onde verte)")
     # FIN
 
 

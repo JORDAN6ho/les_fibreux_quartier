@@ -12,10 +12,9 @@ faire en dehors du README est un écart : on le note, puis on corrige le README.
 
 ### 0.1 Le dépôt
 
-- Le dépôt GitHub (chez Younès) contient directement `serveur.py`, `client.py`, `install.sh`, etc. à sa racine.
-  Pas de dossier `les_fibreux_quartier/les_fibreux_quartier/` en double.
-- Dans le README, la ligne `git clone A_REMPLACER_URL_DU_DEPOT les_fibreux_quartier` contient la vraie URL
-  (bouton « Code » du dépôt, onglet HTTPS). Rechercher `A_REMPLACER` : il ne doit plus en rester.
+- Le dépôt principal est https://github.com/JORDAN6ho/les_fibreux_quartier. Il contient directement
+  `serveur.py`, `client.py`, `install.sh`, etc. à sa racine (pas de dossier `les_fibreux_quartier/` en double).
+- La ligne `git clone` du README pointe bien vers cette URL.
 - Le dépôt est **public**, ou bien vous avez un jeton d'accès sous la main (`git clone` demandera un identifiant).
 - Pas de `venv/` ni de `stats.db` dans le dépôt (le `.gitignore` les exclut déjà).
 

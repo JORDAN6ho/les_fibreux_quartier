@@ -9,7 +9,7 @@ VM 1 = serveur, VM 2 = client (avec bureau graphique). Noter les écarts dans la
 - **VM** : images Debian 12 fournies par l'IUT (OVA), avec bureau graphique. VM 1 `Serveur_lesFibreux` en
   10.0.2.3, VM 2 `Client_lesFibreux` (4 Go de mémoire) en 10.0.2.4.
 - **Réseau** : « Réseau NAT » VirtualBox nommé `NatNetwork`, DHCP activé, commun aux deux VM.
-- **Dépôt utilisé** : https://github.com/JORDAN6ho/les_fibreux_quartier (dépôt de test, version commentée).
+- **Dépôt utilisé** : https://github.com/JORDAN6ho/les_fibreux_quartier (version commentée ; dépôt de test à l'époque, devenu le dépôt principal le 31/10/2026).
 - **Durée** : passe non chronométrée, faite en découvrant les VM et en corrigeant les écarts au fur et à mesure.
   Le temps de déploiement est à mesurer à la passe 2, en repartant de l'instantané « vierge ».
 - **Lignes 8 à 14** : jouées après les lignes 1 à 7, toutes conformes.

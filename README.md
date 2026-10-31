@@ -3,6 +3,9 @@
 **Groupe :** Les Fibreux - **Étudiants :** Jordan HO, Younès BACH
 **Projets :** SAÉ 3.02 (Développer des applications communicantes) / R3.09 (Programmation événementielle)
 
+Ceci est le **dépôt principal** du projet : https://github.com/JORDAN6ho/les_fibreux_quartier. C'est lui qui
+est cloné sur les machines de recette et qui sert de référence pour la soutenance. Le code y est commenté.
+
 Simulation d'un quartier de 4 carrefours (Q1 à Q4) reliés par 6 routes, dont 2 routes de contournement
 (haut et bas), avec 4 entrées/sorties (E1 à E4). Une ambulance prioritaire reçoit un itinéraire calculé avec les
 bouchons du moment (Dijkstra), les carrefours qu'elle va traverser sont préparés à l'avance, et l'itinéraire
@@ -110,8 +113,17 @@ quartier/serveur_reseau.py  serveur TCP et boucle de simulation
 quartier/client_reseau.py   connexion du client (QThread)
 quartier/dessin.py, ihm.py  carte et fenêtre PyQt6
 quartier/protocole.py, config.py, base.py
-AUTO_RECETTE.md             procédure de recette sur deux machines vierges
+AUTO_RECETTE.md             tableau de recette sur deux machines vierges (résultats des passes)
+GUIDE_RECETTE.md            guide pas à pas pour rejouer la recette
+tests/                      tests automatiques (bibliothèque standard)
 ```
+
+## Travailler sur le dépôt
+
+- `main` contient toujours une version qui s'installe et passe la recette.
+- Chaque évolution se fait sur une branche, puis arrive sur `main` par une pull request relue par l'autre membre.
+- Avant de fusionner : lancer les deux commandes de la section *Tests*.
+- Messages de commit en français, qui disent ce qui change (« README : ajout de l'installation de git »).
 
 ## Fonctionnalités (voir le Bilan_Projet.pdf)
 

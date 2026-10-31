@@ -65,6 +65,10 @@ class ServeurTCP:
                         logging.warning("message illisible ignoré")
                         self.envoyer(conn, {"type": "erreur", "message": "message illisible"})
                         continue
+                    # Un JSON valide mais qui n'est pas un objet ([1, 2], "texte") n'a pas de .get()
+                    if not isinstance(message, dict):
+                        self.envoyer(conn, {"type": "erreur", "message": "message illisible"})
+                        continue
                     if message.get("type") == "commande":
                         reponse = self.quartier.executer(message)
                         if reponse:

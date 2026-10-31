@@ -15,7 +15,14 @@ def main():
     base = Base(fichier.get("base", "chemin", fallback="stats.db"))
     quartier = Quartier(base)
     serveur = ServeurTCP(quartier, hote, port)
-    serveur.demarrer()
+    try:
+        serveur.demarrer()
+    except OSError as erreur:
+        # Cas fréquent : un ancien serveur tourne encore (« Address already in use »)
+        logging.error("impossible d'écouter sur %s:%s : %s", hote, port, erreur)
+        logging.error("un autre serveur tourne peut-être encore : pkill -f serveur.py, puis relancer")
+        base.fermer()
+        raise SystemExit(1)
     logging.info("en écoute sur %s:%s (Ctrl+C pour arrêter)", hote, port)
     # Event qui arrête la boucle de simulation quand on fait Ctrl+C
     arret = threading.Event()

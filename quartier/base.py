@@ -43,3 +43,13 @@ class Base:
             curseur = self.connexion.execute("SELECT * FROM trajet_ambulance ORDER BY id")
             colonnes = [c[0] for c in curseur.description]
             return [dict(zip(colonnes, ligne)) for ligne in curseur.fetchall()]
+
+    def moyennes(self):
+        """Durée moyenne (s) et nombre de trajets, avec et sans priorité : {True: (moyenne, n), False: ...}."""
+        with self.verrou:
+            lignes = self.connexion.execute(
+                "SELECT prioritaire, AVG(duree_s), COUNT(*) FROM trajet_ambulance GROUP BY prioritaire").fetchall()
+        resultat = {True: (None, 0), False: (None, 0)}
+        for prio, moyenne, nombre in lignes:
+            resultat[bool(prio)] = (moyenne, nombre)
+        return resultat

@@ -152,8 +152,13 @@ class Quartier:
             elif nom == "ajout":
                 return self.ajouter_voiture()
             elif nom == "urgence":
+                # Une gravité qui n'est pas un nombre (« abc ») faisait planter le thread du client
+                try:
+                    gravite = int(c.get("gravite", 1))
+                except (TypeError, ValueError):
+                    return erreur("gravité invalide (1 à 3)")
                 return self.lancer_ambulance(c.get("depart"), c.get("arrivee"),
-                                             int(c.get("gravite", 1)), bool(c.get("prioritaire", True)))
+                                             gravite, bool(c.get("prioritaire", True)))
             elif nom == "fin_urgence":
                 return self.arreter_urgences()
             elif nom == "route":

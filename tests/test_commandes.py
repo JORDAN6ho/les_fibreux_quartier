@@ -30,6 +30,12 @@ def main():
     assert q.compter("voiture") <= 24, "la limite de 24 voitures doit être respectée"
     assert {"type": "erreur", "message": "limite de voitures atteinte"} in ajouts or q.compter("voiture") < 24
 
+    assert q.executer({"nom": "urgence", "depart": "E3", "arrivee": "E3", "gravite": 1})["message"] \
+        == "départ ou arrivée invalide"
+    assert q.executer({"nom": "urgence", "depart": "Q1", "arrivee": "E4", "gravite": 1})["message"] \
+        == "départ ou arrivée invalide"
+    assert Quartier(None).executer({"nom": "fin_urgence"})["message"] == "aucune urgence en cours"
+
     print("OK : commandes invalides refusées avec un message d'erreur")
 
 

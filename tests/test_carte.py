@@ -19,6 +19,12 @@ def main():
     assert carte.longueur(carte.rogner([(0, 0), (100, 0)], 10, 20)) == 70
     assert carte.decaler([(0, 0), (100, 0)], 11) == [(0, 11), (100, 11)]
     print("OK : rogner et décaler une voie")
+    # Graphe : chaque route est utilisable dans les deux sens, et chaque voie arrive sur un axe connu
+    for rid, (a, b, _, _) in carte.ROUTES.items():
+        assert (b, rid, 1) in carte.VOISINS[a] and (a, rid, -1) in carte.VOISINS[b]
+    assert len(carte.VOIES) == 2 * len(carte.ROUTES)
+    assert all(axe in ("ew", "ns") for _, axe in carte.ARRIVEES.values())
+    print("OK : graphe des routes cohérent (deux sens par route)")
     # FIN
 
 

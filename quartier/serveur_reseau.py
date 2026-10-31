@@ -72,6 +72,11 @@ class ServeurTCP:
                         continue
                     if message.get("type") == "commande":
                         reponse = self.quartier.executer(message)
+                        if message.get("nom") == "urgence" and not reponse:
+                            logging.info("urgence demandée : %s vers %s, gravité %s", message.get("depart"),
+                                         message.get("arrivee"), message.get("gravite"))
+                        elif reponse:
+                            logging.info("commande refusée : %s", reponse["message"])
                         if reponse:
                             self.envoyer(conn, reponse)
         # Client déconnecté brutalement : on le retire quand même

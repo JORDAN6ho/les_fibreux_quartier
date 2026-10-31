@@ -23,6 +23,24 @@ Deux programmes qui communiquent par sockets TCP (messages JSON, un par ligne) :
 Messages : `commande` (client vers serveur : lancer ou arrêter une urgence, route dense ou bloquée, ajout de
 voiture, trafic automatique), `etat` (avec l'itinéraire de chaque ambulance) (serveur vers client, 11 fois par seconde), `erreur` (commande refusée).
 
+## Protocole
+
+Un message JSON par ligne, encodé en UTF-8 (`quartier/protocole.py`). Exemples :
+
+```json
+{"type":"commande","nom":"urgence","depart":"E3","arrivee":"E4","gravite":2,"prioritaire":true}
+{"type":"commande","nom":"route","route":"h34","etat":"bloquee"}
+{"type":"commande","nom":"ajout"}
+{"type":"commande","nom":"auto","valeur":false}
+{"type":"commande","nom":"fin_urgence"}
+{"type":"erreur","message":"gravité invalide (1 à 3)"}
+```
+
+Le message `etat` contient : `tick`, `usagers` (position et angle de chaque véhicule), `feux` (couleur par axe
+pour Q1 à Q4), `routes` (état et nombre de véhicules par sens), `ambulances` (itinéraire), `strategies`,
+`serrer`, `compteurs` et `stats`. Une ligne illisible ou une commande invalide reçoit un message `erreur`, sans
+couper la connexion.
+
 ## Installation (environ 10 minutes par machine, Ubuntu 22.04 ou Debian 12)
 
 Sur chaque machine, l'utilisateur doit pouvoir utiliser `sudo`. Si `sudo true` répond « n'est pas dans le

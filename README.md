@@ -95,12 +95,20 @@ Sur la VM 1, après `bash install.sh serveur`, `python3` suffit : le serveur n'u
 ## Tests
 
 ```bash
-python3 -m tests.test_simulation   # itinéraires, urgences, stabilité, priorité contre sans priorité
-python3 -m tests.test_reseau       # échange client/serveur en TCP
+python3 -m tests                    # tous les tests d'un coup (quelques secondes)
+python3 -m tests.test_simulation    # itinéraires, urgences, stabilité, priorité contre sans priorité
+python3 -m tests.test_reseau        # échange client/serveur en TCP
+python3 -m tests.test_protocole     # messages JSON (aller-retour, accents, ligne illisible)
+python3 -m tests.test_config        # ordre de priorité de la configuration, port invalide
+python3 -m tests.test_base          # enregistrement et relecture des trajets dans sqlite3
 ```
 
 À lancer depuis le dossier `les_fibreux_quartier`, sur l'une ou l'autre VM : les tests n'utilisent que la
-bibliothèque standard, le venv n'est pas nécessaire.
+bibliothèque standard, le venv n'est pas nécessaire. Ils tournent aussi automatiquement sur GitHub à chaque
+push (onglet *Actions*, fichier `.github/workflows/tests.yml`).
+
+Si le serveur refuse de démarrer avec « impossible d'écouter », un ancien serveur tourne encore :
+`pkill -f serveur.py`, puis relancer.
 
 ## Structure
 
@@ -115,14 +123,14 @@ quartier/dessin.py, ihm.py  carte et fenêtre PyQt6
 quartier/protocole.py, config.py, base.py
 AUTO_RECETTE.md             tableau de recette sur deux machines vierges (résultats des passes)
 GUIDE_RECETTE.md            guide pas à pas pour rejouer la recette
-tests/                      tests automatiques (bibliothèque standard)
+tests/                      tests automatiques (bibliothèque standard), lancés par python3 -m tests
 ```
 
 ## Travailler sur le dépôt
 
 - `main` contient toujours une version qui s'installe et passe la recette.
 - Chaque évolution se fait sur une branche, puis arrive sur `main` par une pull request relue par l'autre membre.
-- Avant de fusionner : lancer les deux commandes de la section *Tests*.
+- Avant de fusionner : `python3 -m tests` doit passer (GitHub le vérifie aussi sur chaque pull request).
 - Messages de commit en français, qui disent ce qui change (« README : ajout de l'installation de git »).
 
 ## Fonctionnalités (voir le Bilan_Projet.pdf)

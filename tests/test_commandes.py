@@ -22,6 +22,9 @@ def main():
     assert q.executer({"nom": "route", "route": "h12", "etat": "dense"}) is None
     assert q.etats_routes["h12"] == "dense"
 
+    assert q.executer({"nom": "auto", "valeur": False}) is None and q.trafic_auto is False
+    assert q.executer({"nom": "auto", "valeur": True}) is None and q.trafic_auto is True
+
     print("OK : commandes invalides refusées avec un message d'erreur")
 
 

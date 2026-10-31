@@ -15,6 +15,10 @@ def main():
     assert carte.point_sur(ligne, 150) == (150, 0, 1, 0)
     assert carte.point_sur(ligne, 500) == (300, 200, 0, 1)
     print("OK : longueur et point sur une ligne brisée")
+    # Rogner retire le début et la fin ; décaler garde la longueur sur une ligne droite
+    assert carte.longueur(carte.rogner([(0, 0), (100, 0)], 10, 20)) == 70
+    assert carte.decaler([(0, 0), (100, 0)], 11) == [(0, 11), (100, 11)]
+    print("OK : rogner et décaler une voie")
     # FIN
 
 

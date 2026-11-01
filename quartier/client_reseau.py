@@ -43,3 +43,11 @@ class ClientReseau(QThread):
                 self.socket.sendall(encoder(message))
         except OSError:
             self.statut.emit("Envoi impossible : connexion perdue")
+
+    def arreter(self):
+        if self.socket:
+            try:
+                self.socket.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            self.socket.close()

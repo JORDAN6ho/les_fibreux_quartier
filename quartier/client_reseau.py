@@ -34,3 +34,12 @@ class ClientReseau(QThread):
         except OSError:
             pass
         self.statut.emit("Connexion perdue")
+
+    def envoyer(self, message):
+        if self.socket is None:
+            return
+        try:
+            with self.verrou:
+                self.socket.sendall(encoder(message))
+        except OSError:
+            self.statut.emit("Envoi impossible : connexion perdue")

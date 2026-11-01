@@ -17,6 +17,7 @@ class ClientReseau(QThread):
         self.verrou = threading.Lock()
 
     def run(self):
+          def run(self):
         try:
             self.socket = socket.create_connection((self.hote, self.port), timeout=5)
         except OSError as erreur:
@@ -31,3 +32,6 @@ class ClientReseau(QThread):
                         self.message.emit(decoder(ligne))
                     except ValueError:
                         continue
+        except OSError:
+            pass
+        self.statut.emit("Connexion perdue")

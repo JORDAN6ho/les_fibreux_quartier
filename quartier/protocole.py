@@ -1,15 +1,12 @@
-"""Protocole réseau : un message JSON par ligne."""
 import json
 
-ENCODAGE = "utf-8"
 
-
-def encoder(message):
-    """Transforme un dictionnaire en une ligne JSON prête à être envoyée."""
-    # Sans espaces pour un message plus court ; le retour à la ligne marque la fin du message
-    return (json.dumps(message, separators=(",", ":")) + "\n").encode(ENCODAGE)
-
+def encoder(message): # message : le paramètre, c’est-à-dire l’objet Python (bibliothèque) à transformer.
+    return (json.dumps(message, separators=(",", ":")) + "\n").encode()
+    # json.dumps(message, ...) : transforme l’objet Python en chaîne de caractères JSON.
+    # separators=(",", ":") : choisit les séparateurs utilisés dans le JSON pour la lisibilité.
+    # + "\n" : ajoute un saut de ligne à la fin de la chaîne et indispansable car c’est lui qui marque la fin d’un message.
+    # .encode() : convertit la chaîne (str) en octets (bytes), aussi indispensable car sinon ça crash.
 
 def decoder(ligne):
-    """Transforme une ligne reçue en dictionnaire."""
-    return json.loads(ligne.decode(ENCODAGE))
+    return json.loads(ligne) # json.loads(...) : transforme un texte JSON en objet Python

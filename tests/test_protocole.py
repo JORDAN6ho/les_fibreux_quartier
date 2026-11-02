@@ -2,7 +2,7 @@
 
 Lancer depuis la racine : python -m tests.test_protocole
 """
-from quartier.protocole import decoder, encoder
+from quartier.serveur_reseau import decoder, encoder
 
 
 def main():

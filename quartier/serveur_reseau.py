@@ -1,3 +1,4 @@
+import logging
 import json
 import threading
 import socket 
@@ -32,3 +33,17 @@ class ServeurTCP:
         threading.Thread(target=self.accepter, daemon=True).start()
         # target=self.accepter : le thread fait tourner accepter().
         # daemon=True : le thread s'arrête tout seul quand le programme se ferme.
+
+    def accepter(self):
+        """Permet que les clients lancent un thread pour chacun."""
+        while True:
+            try:
+                conn, adresse = self.socket.accept()
+                # accept : bloque jusqu'à ce qu'un client arrive, renvoie sa connexion et son adresse.
+            except OSError:
+                return  # OSError : le port a été fermé par arreter(), on sort
+            with self.verrou:
+                self.clients.append(conn)  # append : ajoute le client à la liste
+            logging.info("client connecté : %s", adresse[0])  # adresse[0] : l'IP du client
+            threading.Thread(target=self.gerer_client, args=(conn,), daemon=True).start()
+            # args=(conn,) : donne la connexion au thread, la virgule est obligatoire pour un tuple d'un seul élément.

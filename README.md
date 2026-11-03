@@ -25,7 +25,7 @@ voiture, trafic automatique), `etat` (avec l'itinéraire de chaque ambulance) (s
 
 ## Protocole
 
-Un message JSON par ligne, encodé en UTF-8 (`quartier/protocole.py`). Exemples :
+Un message JSON par ligne, encodé en UTF-8 (`quartier/serveur_reseau.py`). Exemples :
 
 ```json
 {"type":"commande","nom":"urgence","depart":"E3","arrivee":"E4","gravite":2,"prioritaire":true}
@@ -152,7 +152,7 @@ quartier/simulation.py      feux, véhicules, urgences, statistiques
 quartier/serveur_reseau.py  serveur TCP et boucle de simulation
 quartier/client_reseau.py   connexion du client (QThread)
 quartier/dessin.py, ihm.py  carte et fenêtre PyQt6
-quartier/protocole.py, config.py, base.py
+quartier/config.py, base.py
 outils/trajets.py           affichage des trajets enregistrés dans stats.db
 CHANGELOG.md                historique des versions
 AUTO_RECETTE.md             tableau de recette sur deux machines vierges (résultats des passes)

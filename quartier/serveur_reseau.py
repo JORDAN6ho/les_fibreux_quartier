@@ -47,3 +47,18 @@ class ServeurTCP:
             logging.info("client connecté : %s", adresse[0])  # adresse[0] : l'IP du client
             threading.Thread(target=self.gerer_client, args=(conn,), daemon=True).start()
             # args=(conn,) : donne la connexion au thread, la virgule est obligatoire pour un tuple d'un seul élément.
+
+    
+    def arreter(self):
+        self.socket.close()
+        # close() : ferme le port, plus aucun client ne peut se connecter.
+        # Ça fait aussi lever une OSError dans accepter(), qui s'arrête.
+        with self.verrou:
+            # with self.verrou : on prend le verrou, aucun autre thread ne touche la liste pendant ce bloc.
+            # Le verrou est rendu tout seul à la fin du bloc with.
+            for conn in self.clients:
+                # for conn in self.clients : on passe sur chaque client connecté, conn est sa connexion.
+                conn.close()
+                # conn.close() : coupe la connexion de ce client.
+            self.clients.clear()
+            # clear() : vide la liste, il n'y a plus de client.

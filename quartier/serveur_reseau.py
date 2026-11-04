@@ -40,16 +40,22 @@ class ServeurTCP:
             try:
                 conn, adresse = self.socket.accept()
                 # accept : bloque jusqu'à ce qu'un client arrive, renvoie sa connexion et son adresse.
+                # conn : la connexion avec ce client, adresse : son IP et son port.
             except OSError:
                 return  # OSError : le port a été fermé par arreter(), on sort
             with self.verrou:
                 self.clients.append(conn)  # append : ajoute le client à la liste
             logging.info("client connecté : %s", adresse[0])  # adresse[0] : l'IP du client
+            # logging.info(...) : écrit un message dans le journal du serveur.
+            # %s : remplacé par adresse[0], c'est-à-dire l'IP du client.
             threading.Thread(target=self.gerer_client, args=(conn,), daemon=True).start()
+            # Un thread par client : chaque client est écouté en même temps que les autres.
+            # target=self.gerer_client : le thread fait tourner gerer_client().
             # args=(conn,) : donne la connexion au thread, la virgule est obligatoire pour un tuple d'un seul élément.
 
     
     def arreter(self):
+        """ferme le port et coupe toutes les connexions."""
         self.socket.close()
         # close() : ferme le port, plus aucun client ne peut se connecter.
         # Ça fait aussi lever une OSError dans accepter(), qui s'arrête.
@@ -62,3 +68,34 @@ class ServeurTCP:
                 # conn.close() : coupe la connexion de ce client.
             self.clients.clear()
             # clear() : vide la liste, il n'y a plus de client.
+    
+
+    def retirer(self, conn):
+        """ça enlève un client de la liste."""
+        with self.verrou:
+            if conn in self.clients:
+                # conn in self.clients : vrai si le client est encore dans la liste.
+                # ça évite de le retirer deux fois (ça planterait avec remove).
+                self.clients.remove(conn)
+                # remove(conn) : enlève ce client de la liste.
+                logging.info("client déconnecté")
+        conn.close()
+        # conn.close() : ferme la connexion, même si le client n'était plus dans la liste.
+    
+
+    def envoyer(self, conn, message):
+        """envoie un message à un seul client."""
+        # conn : le client à qui envoyer, message : le dictionnaire à envoyer.
+        try:
+            with self.verrou:
+                # verrou : deux threads ne peuvent pas écrire en même temps, sinon les messages se mélangent.
+                conn.sendall(encoder(message))
+                # encoder(message) : transforme le dictionnaire en ligne JSON en octets.
+                # sendall(...) : envoie tous les octets, même si ça prend plusieurs envois.
+            return True
+            # True : le message est bien parti.
+        except OSError:
+            return False
+            # OSError : la connexion est coupée, False prévient diffuser que ce client n'est plus là.
+
+    #def gerer_client(self, conn):

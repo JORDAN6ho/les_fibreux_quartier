@@ -98,4 +98,41 @@ class ServeurTCP:
             return False
             # OSError : la connexion est coupée, False prévient diffuser que ce client n'est plus là.
 
-    #def gerer_client(self, conn):
+    def gerer_client(self, conn):
+    # conn : la connexion avec un client, donnée par accepter().
+        try:
+            with conn.makefile("rb") as flux:
+                # makefile("rb") : permet de lire la connexion comme un fichier.
+                # "rb" : r pour lire (read), b pour binaire, on lit des octets.
+                # with ... as flux : le fichier est fermé tout seul à la fin du bloc.
+                for ligne in flux:
+                    # for ligne in flux : un tour de boucle par ligne reçue, donc par message.
+                    # La boucle s'arrête quand le client se déconnecte.
+                    try:
+                        message = decoder(ligne)
+                        # decoder(ligne) : transforme la ligne JSON en objet Python.
+                    except ValueError:
+                        message = None
+                        # ValueError : la ligne n'est pas du JSON, on met None pour la traiter comme illisible.
+                    if not isinstance(message, dict):
+                        # isinstance(message, dict) : vrai si message est un dictionnaire.
+                        # not : on entre ici si ce n'est PAS un dictionnaire (None, une liste comme [1, 2], un nombre...).
+                        self.envoyer(conn, {"type": "erreur", "message": "message illisible"})
+                        # On répond au client avec un message d'erreur.
+                    elif message.get("type") == "commande":
+                        # .get("type") : lit la clé "type" sans planter si elle n'existe pas (renvoie None).
+                        # == "commande" : on ne traite que les messages de type commande.
+                        erreur = self.quartier.executer(message)
+                        # executer(message) : la simulation applique la commande.
+                        # Elle renvoie None si tout va bien, ou un message d'erreur si la commande est refusée.
+                        if erreur:
+                            # if erreur : vrai seulement si executer a renvoyé une erreur.
+                            logging.info("commande refusée : %s", erreur["message"])
+                            # erreur["message"] : la raison du refus, écrite dans le journal.
+                            self.envoyer(conn, erreur)
+                            # On prévient le client que sa commande est refusée.
+        except OSError:
+            pass
+            # OSError : le client est parti brutalement (câble, fermeture), pass veut dire qu'on ne fait rien de plus.
+        self.retirer(conn)
+        # retirer(conn) : le client a fini, on l'enlève de la liste et on ferme sa connexion.

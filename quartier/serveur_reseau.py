@@ -154,34 +154,34 @@ class ServeurTCP:
                 self.retirer(conn)
                 # Le client n'est plus là, on le retire.
 
-    def boucle_simulation(quartier, serveur, arret):
-        """Fait avancer le quartier et envoie l'état aux clients."""
-        # quartier : la simulation, serveur : le ServeurTCP, arret : un Event qui dit quand s'arrêter.
-        pas = 0
-        # pas : compte les tours de boucle.
-        while not arret.is_set():
-        # arret.is_set() : devient vrai quand on demande l'arrêt du serveur (Ctrl+C dans serveur.py).
-        # while not ... : on tourne tant que l'arrêt n'est pas demandé.
-            debut = time.time()
-            # time.time() : l'heure actuelle en secondes, pour mesurer combien de temps dure ce tour.
-            with quartier.verrou:
-            # quartier.verrou : le verrou de la simulation, une commande ne peut pas la modifier en même temps.
-                quartier.avancer()
-                # avancer() : fait bouger les feux et les véhicules d'un pas.
-                etat = quartier.instantane() if pas % 3 == 0 else None
-            # instantane() : l'état complet du quartier (feux, véhicules...) sous forme de dictionnaire.
-            # pas % 3 == 0 : % est le reste de la division, vrai un tour sur trois seulement.
-            # else None : les autres tours, on n'envoie rien, pour ne pas surcharger le réseau.
-            if etat:
-                serveur.diffuser(etat)
-            # diffuser(etat) : envoie l'état à tous les clients, hors du verrou pour ne pas bloquer la simulation.
-            pas += 1
-            # += 1 : on ajoute 1 au compteur de tours.
-            time.sleep(max(0, 0.03 - (time.time() - debut)))
-            # time.time() - debut : le temps qu'a pris ce tour.
-            # 0.03 - ... : ce qu'il reste à attendre pour qu'un tour dure 30 ms.
-            # max(0, ...) : évite une attente négative si le tour a été plus long que 30 ms.
-            # time.sleep(...) : met le thread en pause pendant ce temps.
-    
+def boucle_simulation(quartier, serveur, arret):
+    """Fait avancer le quartier et envoie l'état aux clients."""
+    # quartier : la simulation, serveur : le ServeurTCP, arret : un Event qui dit quand s'arrêter.
+    pas = 0
+    # pas : compte les tours de boucle.
+    while not arret.is_set():
+    # arret.is_set() : devient vrai quand on demande l'arrêt du serveur (Ctrl+C dans serveur.py).
+    # while not ... : on tourne tant que l'arrêt n'est pas demandé.
+        debut = time.time()
+        # time.time() : l'heure actuelle en secondes, pour mesurer combien de temps dure ce tour.
+        with quartier.verrou:
+        # quartier.verrou : le verrou de la simulation, une commande ne peut pas la modifier en même temps.
+            quartier.avancer()
+            # avancer() : fait bouger les feux et les véhicules d'un pas.
+            etat = quartier.instantane() if pas % 3 == 0 else None
+        # instantane() : l'état complet du quartier (feux, véhicules...) sous forme de dictionnaire.
+        # pas % 3 == 0 : % est le reste de la division, vrai un tour sur trois seulement.
+        # else None : les autres tours, on n'envoie rien, pour ne pas surcharger le réseau.
+        if etat:
+            serveur.diffuser(etat)
+        # diffuser(etat) : envoie l'état à tous les clients, hors du verrou pour ne pas bloquer la simulation.
+        pas += 1
+        # += 1 : on ajoute 1 au compteur de tours.
+        time.sleep(max(0, 0.03 - (time.time() - debut)))
+        # time.time() - debut : le temps qu'a pris ce tour.
+        # 0.03 - ... : ce qu'il reste à attendre pour qu'un tour dure 30 ms.
+        # max(0, ...) : évite une attente négative si le tour a été plus long que 30 ms.
+        # time.sleep(...) : met le thread en pause pendant ce temps.
 
-    
+
+

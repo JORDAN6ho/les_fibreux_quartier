@@ -4,6 +4,7 @@ import threading
 import socket 
 
 def encoder(message): # message : le paramètre, c’est-à-dire l’objet Python (bibliothèque) à transformer.
+    """Prépare un message avant de l'envoyer."""
     return (json.dumps(message, separators=(",", ":")) + "\n").encode()
     # json.dumps(message, ...) : transforme l’objet Python en chaîne de caractères JSON.
     # separators=(",", ":") : choisit les séparateurs utilisés dans le JSON pour la lisibilité.
@@ -11,9 +12,11 @@ def encoder(message): # message : le paramètre, c’est-à-dire l’objet Pytho
     # .encode() : convertit la chaîne (str) en octets (bytes), aussi indispensable car sinon ça crash.
 
 def decoder(ligne):
+    """Relit un message reçu."""
     return json.loads(ligne) # json.loads(...) : transforme un texte JSON en objet Python
 
 class ServeurTCP:
+    """Utilise un thread pour chaque client."""
     def __init__(self, quartier, hote, port):
         self.quartier = quartier  # quartier : la simulation, pour exécuter les commandes des clients
         self.hote = hote  # hote : l'adresse IP où le serveur écoute
@@ -136,3 +139,16 @@ class ServeurTCP:
             # OSError : le client est parti brutalement (câble, fermeture), pass veut dire qu'on ne fait rien de plus.
         self.retirer(conn)
         # retirer(conn) : le client a fini, on l'enlève de la liste et on ferme sa connexion.
+    
+    def diffuser(self, message):
+        """Envoie un message à tous les clients."""
+        with self.verrou:
+            clients = list(self.clients)
+            # list(self.clients) : fait une copie de la liste.
+            # On envoie avec la copie, comme ça on ne garde pas le verrou pendant tous les envois.
+        for conn in clients:
+            # On passe sur chaque client de la copie.
+            if not self.envoyer(conn, message):
+                # not self.envoyer(...) : vrai si envoyer a renvoyé False, donc si l'envoi a raté.
+                self.retirer(conn)
+                # Le client n'est plus là, on le retire.

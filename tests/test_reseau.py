@@ -7,8 +7,7 @@ import socket
 import threading
 import time
 
-from quartier.protocole import decoder, encoder
-from quartier.serveur_reseau import ServeurTCP, boucle_simulation
+from quartier.serveur_reseau import ServeurTCP, boucle_simulation, decoder, encoder
 from quartier.simulation import Quartier
 
 

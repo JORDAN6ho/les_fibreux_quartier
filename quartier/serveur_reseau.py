@@ -1,129 +1,187 @@
-"""Serveur TCP : accepte les clients, exécute leurs commandes et diffuse l'état du quartier."""
-import logging
-import socket
-import threading
 import time
+import logging
+import json
+import threading
+import socket 
 
-from quartier.protocole import decoder, encoder
+def encoder(message): # message : le paramètre, c’est-à-dire l’objet Python (bibliothèque) à transformer.
+    """Prépare un message avant de l'envoyer."""
+    return (json.dumps(message, separators=(",", ":")) + "\n").encode()
+    # json.dumps(message, ...) : transforme l’objet Python en chaîne de caractères JSON.
+    # separators=(",", ":") : choisit les séparateurs utilisés dans le JSON pour la lisibilité.
+    # + "\n" : ajoute un saut de ligne à la fin de la chaîne et indispansable car c’est lui qui marque la fin d’un message.
+    # .encode() : convertit la chaîne (str) en octets (bytes), aussi indispensable car sinon ça crash.
 
+def decoder(ligne):
+    """Relit un message reçu."""
+    return json.loads(ligne) # json.loads(...) : transforme un texte JSON en objet Python
 
 class ServeurTCP:
-    """Serveur socket TCP (un thread par client) qui diffuse des messages JSON."""
-
+    """Utilise un thread pour chaque client."""
     def __init__(self, quartier, hote, port):
-        """Prépare le serveur sans encore ouvrir le port."""
-        self.quartier, self.hote, self.port = quartier, hote, port
-        # Sockets des clients connectés, protégées par le verrou
-        self.clients = []
-        self.verrou = threading.Lock()
-        # Event levé tant que le serveur doit accepter des clients
-        self.actif = threading.Event()
-        self.socket = None
+        self.quartier = quartier  # quartier : la simulation, pour exécuter les commandes des clients
+        self.hote = hote  # hote : l'adresse IP où le serveur écoute
+        self.port = port  # port : le numéro de port (lu dans config.ini)
+        self.socket = None  # None : pas encore de socket tant que demarrer() n'est pas appelé
+        self.clients = []  # clients : la liste des connexions des clients connectés
+        self.verrou = threading.Lock()  # verrou : évite que deux threads touchent la liste en même temps
 
     def demarrer(self):
-        """Ouvre le port et lance l'écoute dans un thread."""
+        """Ouvre le port et commence à accepter les clients."""
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # Permet de relancer le serveur tout de suite sur le même port
+        # AF_INET : adresse IPv4, SOCK_STREAM : TCP.
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.socket.bind((self.hote, self.port))
-        self.socket.listen()
-        self.actif.set()
-        # accept() est bloquant : on l'exécute dans son propre thread
+        # SO_REUSEADDR : on peut relancer le serveur tout de suite sur le même port sans erreur « adresse déjà utilisée ».
+        self.socket.bind((self.hote, self.port))  # bind : attache le socket à l'adresse et au port
+        self.socket.listen()  # listen : le serveur attend les connexions
         threading.Thread(target=self.accepter, daemon=True).start()
-
-    def arreter(self):
-        """Arrête l'écoute et ferme les connexions."""
-        self.actif.clear()
-        self.socket.close()
-        with self.verrou:
-            for conn in self.clients:
-                conn.close()
-            self.clients.clear()
+        # target=self.accepter : le thread fait tourner accepter().
+        # daemon=True : le thread s'arrête tout seul quand le programme se ferme.
 
     def accepter(self):
-        """Accepte les nouveaux clients."""
-        while self.actif.is_set():
+        """Permet que les clients lancent un thread pour chacun."""
+        while True:
             try:
                 conn, adresse = self.socket.accept()
+                # accept : bloque jusqu'à ce qu'un client arrive, renvoie sa connexion et son adresse.
+                # conn : la connexion avec ce client, adresse : son IP et son port.
             except OSError:
-                break
+                return  # OSError : le port a été fermé par arreter(), on sort
             with self.verrou:
-                self.clients.append(conn)
-                nombre = len(self.clients)
-            logging.info("client connecté : %s:%s (%d client(s) connecté(s))", *adresse[:2], nombre)
-            # Un thread par client, pour que chacun soit servi sans bloquer les autres
+                self.clients.append(conn)  # append : ajoute le client à la liste
+            logging.info("client connecté : %s", adresse[0])  # adresse[0] : l'IP du client
+            # logging.info(...) : écrit un message dans le journal du serveur.
+            # %s : remplacé par adresse[0], c'est-à-dire l'IP du client.
             threading.Thread(target=self.gerer_client, args=(conn,), daemon=True).start()
+            # Un thread par client : chaque client est écouté en même temps que les autres.
+            # target=self.gerer_client : le thread fait tourner gerer_client().
+            # args=(conn,) : donne la connexion au thread, la virgule est obligatoire pour un tuple d'un seul élément.
 
-    def gerer_client(self, conn):
-        """Lit les commandes d'un client et y répond."""
-        try:
-            # makefile permet de lire la socket ligne par ligne (un message JSON par ligne)
-            with conn.makefile("rb") as flux:
-                for ligne in flux:
-                    try:
-                        message = decoder(ligne)
-                    except ValueError:
-                        logging.warning("message illisible ignoré")
-                        self.envoyer(conn, {"type": "erreur", "message": "message illisible"})
-                        continue
-                    # Un JSON valide mais qui n'est pas un objet ([1, 2], "texte") n'a pas de .get()
-                    if not isinstance(message, dict):
-                        self.envoyer(conn, {"type": "erreur", "message": "message illisible"})
-                        continue
-                    if message.get("type") == "commande":
-                        reponse = self.quartier.executer(message)
-                        if message.get("nom") == "urgence" and not reponse:
-                            logging.info("urgence demandée : %s vers %s, gravité %s", message.get("depart"),
-                                         message.get("arrivee"), message.get("gravite"))
-                        elif reponse:
-                            logging.info("commande refusée : %s", reponse["message"])
-                        if reponse:
-                            self.envoyer(conn, reponse)
-        # Client déconnecté brutalement : on le retire quand même
-        except OSError:
-            pass
-        self.retirer(conn)
+    
+    def arreter(self):
+        """ferme le port et coupe toutes les connexions."""
+        self.socket.close()
+        # close() : ferme le port, plus aucun client ne peut se connecter.
+        # Ça fait aussi lever une OSError dans accepter(), qui s'arrête.
+        with self.verrou:
+            # with self.verrou : on prend le verrou, aucun autre thread ne touche la liste pendant ce bloc.
+            # Le verrou est rendu tout seul à la fin du bloc with.
+            for conn in self.clients:
+                # for conn in self.clients : on passe sur chaque client connecté, conn est sa connexion.
+                conn.close()
+                # conn.close() : coupe la connexion de ce client.
+            self.clients.clear()
+            # clear() : vide la liste, il n'y a plus de client.
+    
 
     def retirer(self, conn):
-        """Retire un client déconnecté."""
+        """ça enlève un client de la liste."""
         with self.verrou:
             if conn in self.clients:
+                # conn in self.clients : vrai si le client est encore dans la liste.
+                # ça évite de le retirer deux fois (ça planterait avec remove).
                 self.clients.remove(conn)
-                logging.info("client déconnecté (%d client(s) restant(s))", len(self.clients))
+                # remove(conn) : enlève ce client de la liste.
+                logging.info("client déconnecté")
         conn.close()
+        # conn.close() : ferme la connexion, même si le client n'était plus dans la liste.
+    
 
     def envoyer(self, conn, message):
-        """Envoie un message à un client ; retourne False si la connexion est coupée."""
+        """envoie un message à un seul client."""
+        # conn : le client à qui envoyer, message : le dictionnaire à envoyer.
         try:
-            # Le verrou évite que deux threads écrivent en même temps sur une socket
             with self.verrou:
+                # verrou : deux threads ne peuvent pas écrire en même temps, sinon les messages se mélangent.
                 conn.sendall(encoder(message))
+                # encoder(message) : transforme le dictionnaire en ligne JSON en octets.
+                # sendall(...) : envoie tous les octets, même si ça prend plusieurs envois.
             return True
+            # True : le message est bien parti.
         except OSError:
             return False
+            # OSError : la connexion est coupée, False prévient diffuser que ce client n'est plus là.
 
+    def gerer_client(self, conn):
+    # conn : la connexion avec un client, donnée par accepter().
+        try:
+            with conn.makefile("rb") as flux:
+                # makefile("rb") : permet de lire la connexion comme un fichier.
+                # "rb" : r pour lire (read), b pour binaire, on lit des octets.
+                # with ... as flux : le fichier est fermé tout seul à la fin du bloc.
+                for ligne in flux:
+                    # for ligne in flux : un tour de boucle par ligne reçue, donc par message.
+                    # La boucle s'arrête quand le client se déconnecte.
+                    try:
+                        message = decoder(ligne)
+                        # decoder(ligne) : transforme la ligne JSON en objet Python.
+                    except ValueError:
+                        message = None
+                        # ValueError : la ligne n'est pas du JSON, on met None pour la traiter comme illisible.
+                    if not isinstance(message, dict):
+                        # isinstance(message, dict) : vrai si message est un dictionnaire.
+                        # not : on entre ici si ce n'est PAS un dictionnaire (None, une liste comme [1, 2], un nombre...).
+                        self.envoyer(conn, {"type": "erreur", "message": "message illisible"})
+                        # On répond au client avec un message d'erreur.
+                    elif message.get("type") == "commande":
+                        # .get("type") : lit la clé "type" sans planter si elle n'existe pas (renvoie None).
+                        # == "commande" : on ne traite que les messages de type commande.
+                        erreur = self.quartier.executer(message)
+                        # executer(message) : la simulation applique la commande.
+                        # Elle renvoie None si tout va bien, ou un message d'erreur si la commande est refusée.
+                        if erreur:
+                            # if erreur : vrai seulement si executer a renvoyé une erreur.
+                            logging.info("commande refusée : %s", erreur["message"])
+                            # erreur["message"] : la raison du refus, écrite dans le journal.
+                            self.envoyer(conn, erreur)
+                            # On prévient le client que sa commande est refusée.
+        except OSError:
+            pass
+            # OSError : le client est parti brutalement (câble, fermeture), pass veut dire qu'on ne fait rien de plus.
+        self.retirer(conn)
+        # retirer(conn) : le client a fini, on l'enlève de la liste et on ferme sa connexion.
+    
     def diffuser(self, message):
-        """Envoie un message à tous les clients connectés."""
+        """Envoie un message à tous les clients."""
         with self.verrou:
-            # Copie de la liste pour ne pas garder le verrou pendant les envois
             clients = list(self.clients)
+            # list(self.clients) : fait une copie de la liste.
+            # On envoie avec la copie, comme ça on ne garde pas le verrou pendant tous les envois.
         for conn in clients:
+            # On passe sur chaque client de la copie.
             if not self.envoyer(conn, message):
+                # not self.envoyer(...) : vrai si envoyer a renvoyé False, donc si l'envoi a raté.
                 self.retirer(conn)
-
+                # Le client n'est plus là, on le retire.
 
 def boucle_simulation(quartier, serveur, arret):
-    """Fait avancer la simulation (33 pas par seconde) et diffuse l'état 11 fois par seconde."""
-    compteur = 0
+    """Fait avancer le quartier et envoie l'état aux clients."""
+    # quartier : la simulation, serveur : le ServeurTCP, arret : un Event qui dit quand s'arrêter.
+    pas = 0
+    # pas : compte les tours de boucle.
     while not arret.is_set():
+    # arret.is_set() : devient vrai quand on demande l'arrêt du serveur (Ctrl+C dans serveur.py).
+    # while not ... : on tourne tant que l'arrêt n'est pas demandé.
         debut = time.time()
-        # Le verrou empêche une commande d'un client de modifier le quartier en plein calcul
+        # time.time() : l'heure actuelle en secondes, pour mesurer combien de temps dure ce tour.
         with quartier.verrou:
+        # quartier.verrou : le verrou de la simulation, une commande ne peut pas la modifier en même temps.
             quartier.avancer()
-            # L'état n'est envoyé qu'un pas sur trois pour ne pas surcharger le réseau
-            etat = quartier.instantane() if compteur % 3 == 0 else None
+            # avancer() : fait bouger les feux et les véhicules d'un pas.
+            etat = quartier.instantane() if pas % 3 == 0 else None
+        # instantane() : l'état complet du quartier (feux, véhicules...) sous forme de dictionnaire.
+        # pas % 3 == 0 : % est le reste de la division, vrai un tour sur trois seulement.
+        # else None : les autres tours, on n'envoie rien, pour ne pas surcharger le réseau.
         if etat:
             serveur.diffuser(etat)
-        compteur += 1
-        # On attend le reste des 30 ms pour garder un rythme régulier
-        time.sleep(max(0.0, 0.03 - (time.time() - debut)))
+        # diffuser(etat) : envoie l'état à tous les clients, hors du verrou pour ne pas bloquer la simulation.
+        pas += 1
+        # += 1 : on ajoute 1 au compteur de tours.
+        time.sleep(max(0, 0.03 - (time.time() - debut)))
+        # time.time() - debut : le temps qu'a pris ce tour.
+        # 0.03 - ... : ce qu'il reste à attendre pour qu'un tour dure 30 ms.
+        # max(0, ...) : évite une attente négative si le tour a été plus long que 30 ms.
+        # time.sleep(...) : met le thread en pause pendant ce temps.
+
+
+

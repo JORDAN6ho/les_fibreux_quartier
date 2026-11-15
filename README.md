@@ -11,9 +11,6 @@ Simulation d'un quartier de 4 carrefours (Q1 à Q4) reliés par 6 routes, dont 2
 bouchons du moment (Dijkstra), les carrefours qu'elle va traverser sont préparés à l'avance, et l'itinéraire
 est recalculé si une route se bloque.
 
-> **En une phrase :** une ambulance prioritaire traverse le quartier en environ **11 s au lieu de 33 s**, et
-> contourne seule une route bloquée.
-
 ## Sommaire
 
 1. [Livrables](#livrables)

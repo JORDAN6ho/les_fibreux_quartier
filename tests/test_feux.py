@@ -57,6 +57,18 @@ def main():
     autre = SimpleNamespace(ident=2, so=0.0, trajet=SimpleNamespace(route=[cle_ew]))
     assert q.forcer(autre, 0, 100) is None and q.noeuds[noeud].forcage["amb"] == 1
     print("OK : réservation d'un carrefour mise à jour après un changement d'axe de l'ambulance")
+    # Choix de la stratégie : dégagement si au moins 3 véhicules sont devant l'ambulance, sinon onde verte
+    q = Quartier(None)
+    cle = next(c for c, (nom, _) in ARRIVEES.items() if nom == "Q2")
+    amb = SimpleNamespace(ident=1, so=0.0, trajet=SimpleNamespace(route=[cle]))
+    q.par_route[cle] = [SimpleNamespace(so=50.0 + 10 * i) for i in range(2)]
+    q.forcer(amb, 0, 100)
+    assert q.noeuds["Q2"].forcage["mode"] == "onde_verte"
+    q.noeuds["Q2"].forcage = None
+    q.par_route[cle].append(SimpleNamespace(so=80.0))
+    q.forcer(amb, 0, 100)
+    assert q.noeuds["Q2"].forcage["mode"] == "degagement"
+    print("OK : onde verte avec moins de 3 véhicules devant, dégagement à partir de 3")
     # Petites fonctions : moyenne qui ignore les valeurs manquantes, freinage borné
     assert moyenne([]) is None and moyenne([None, 2, 4]) == 3
     assert freinage(0, 3) == 0 and freinage(1000, 3) == 3 and 0 < freinage(10, 3) < 3

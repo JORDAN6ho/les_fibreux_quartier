@@ -301,6 +301,9 @@ push (onglet *Actions*, fichier `.github/workflows/tests.yml`).
 | Serveur : « port invalide » | Corriger `port` dans `config.ini` (nombre entre 1 et 65535) |
 | Client : erreur Qt « xcb » | Relancer `bash install.sh client`, ou essayer `QT_QPA_PLATFORM=xcb ./venv/bin/python client.py` |
 | `Could not get lock /var/lib/dpkg/lock-frontend` | Mises à jour automatiques d'Ubuntu en cours : attendre puis relancer |
+| Client : boutons « Ajouter une voiture » et « Lancer l'ambulance » vides | Le serveur n'est pas lancé (voir le message « Connexion impossible » en haut du panneau) : lancer `python3 serveur.py` d'abord |
+| WSL : avertissements `libEGL warning` ou `MESA ... ZINK` au lancement du client | Sans gravité : Qt ne trouve pas de pilote graphique et passe en rendu logiciel. Pour les éviter : `LIBGL_ALWAYS_SOFTWARE=1 ./venv/bin/python client.py` |
+| WSL : la fenêtre ne s'ouvre pas | Mettre WSL à jour pour avoir WSLg : `wsl --update` puis `wsl --shutdown` dans PowerShell |
 
 ## Structure
 

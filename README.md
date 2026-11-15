@@ -72,6 +72,64 @@ python3 serveur.py                 # terminal 1 : le serveur, à laisser tourner
 Sous WSL, la fenêtre s'affiche grâce à WSLg (Windows 11 ou Windows 10 à jour). Pour le déploiement réel sur deux
 machines, voir [Installation sur deux machines](#installation-environ-10-minutes-par-machine-ubuntu-2204-ou-debian-12).
 
+## Comment ça marche
+
+### Le quartier
+
+```
+              ┌──────── contournement haut (c12) ────────┐
+              │                                          │
+  E1 ────────Q1──────────── route directe (h12) ─────────Q2──────── E2
+              │                                          │
+            (v13)                                      (v24)
+              │                                          │
+  E3 ────────Q3──────────── route directe (h34) ─────────Q4──────── E4
+              │                                          │
+              └──────── contournement bas (c34) ─────────┘
+```
+
+- **Q1 à Q4** : les 4 carrefours, chacun avec deux axes de feux (est-ouest et nord-sud).
+- **E1 à E4** : les entrées et sorties ; chaque véhicule entre par l'une et sort par une autre.
+- **Les contournements** relient les mêmes carrefours que les routes directes, mais sont plus longs
+  (900 pixels contre 540) : ce sont des routes de secours.
+
+### Les feux
+
+Chaque carrefour suit un cycle : **5 s de vert, 3 s d'orange, 2 s de tout-rouge** sur un axe, puis la même
+chose sur l'autre axe. Les deux axes ne sont jamais ouverts en même temps. Le tout-rouge laisse le temps au
+carrefour de se vider.
+
+### Le choix de l'itinéraire (Dijkstra)
+
+Le quartier est un graphe : les carrefours et entrées sont les nœuds, les routes sont les arêtes. L'algorithme
+de **Dijkstra** (`quartier/carte.py`) cherche le chemin dont le **coût total** est le plus faible. Le coût d'une
+route n'est pas le même pour tout le monde :
+
+| Véhicule | Coût d'une route | Conséquence |
+| --- | --- | --- |
+| Voiture | Sa longueur (à ±5 % près, pour répartir les voitures) ; infini si elle est **bloquée** | Une voiture ne prend un contournement que si la route directe est bloquée |
+| Ambulance prioritaire | Longueur × **facteur de bouchon** (de 1 si la route est vide à 4 si elle est pleine), ×3 si la route est **dense** ; infini si elle est **bloquée** | L'ambulance évite les routes chargées, denses ou bloquées |
+
+Exemple : la route directe Q1-Q2 mesure 540 pixels et le contournement haut 900. L'ambulance passe par le
+contournement dès que la route directe coûte plus de 900 : si elle est marquée dense (540 × 3 = 1 620), ou si
+environ 4 véhicules ou plus y circulent. C'est pourquoi **les contournements restent souvent vides** tant
+qu'aucune route n'est rendue dense ou bloquée : c'est voulu, ils servent en cas de problème.
+
+### La priorité de l'ambulance
+
+1. **Préparation à l'avance** : les carrefours de l'itinéraire sont préparés 7, 9 ou 11 s avant l'arrivée de
+   l'ambulance, selon la gravité (plus elle est grave, plus c'est tôt).
+2. **Stratégie choisie pour chaque carrefour** (`Quartier.forcer` dans `quartier/simulation.py`) :
+   - **onde verte** : moins de 3 véhicules devant l'ambulance, son axe passe au vert et elle traverse sans
+     s'arrêter ;
+   - **dégagement** : au moins 3 véhicules devant elle, le carrefour passe au tout-rouge pour se vider, puis
+     l'axe de l'ambulance passe au vert quand elle est à moins de 4 s.
+3. **Les voitures se serrent à droite** sur la route de l'ambulance (bandeau « Il faut se serrer à droite ! »).
+4. **Recalcul d'itinéraire** environ une fois par seconde : l'ambulance change de chemin si le sien est bloqué ou
+   si un autre est au moins 15 % moins cher. Si elle arrive alors par l'autre axe d'un carrefour déjà
+   réservé, la réservation passe sur le nouvel axe (correctif du 15/11).
+5. **Après le passage** : tout-rouge de sécurité de 2 s, puis le carrefour reprend son cycle normal.
+
 ## Architecture
 
 Deux programmes qui communiquent par sockets TCP (messages JSON, un par ligne) :

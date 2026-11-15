@@ -1,3 +1,4 @@
+"""Serveur TCP : accepte les clients, exécute leurs commandes et diffuse l'état de la simulation."""
 import time
 import logging
 import json
@@ -19,6 +20,7 @@ def decoder(ligne):
 class ServeurTCP:
     """Utilise un thread pour chaque client."""
     def __init__(self, quartier, hote, port):
+        """Prépare le serveur (adresse, port, liste de clients) sans ouvrir de connexion."""
         self.quartier = quartier  # quartier : la simulation, pour exécuter les commandes des clients
         self.hote = hote  # hote : l'adresse IP où le serveur écoute
         self.port = port  # port : le numéro de port (lu dans config.ini)
@@ -103,6 +105,7 @@ class ServeurTCP:
             # OSError : la connexion est coupée, False prévient diffuser que ce client n'est plus là.
 
     def gerer_client(self, conn):
+        """Lit les messages d'un client (un par ligne) et exécute ses commandes, jusqu'à sa déconnexion."""
     # conn : la connexion avec un client, donnée par accepter().
         try:
             with conn.makefile("rb") as flux:

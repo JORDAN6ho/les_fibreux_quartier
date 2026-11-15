@@ -68,6 +68,17 @@ def main():
         assert len(q.attentes) - arrivees > 10, "le trafic ne s'écoule plus"
     print("voitures : contournement pris quand la route directe est bloquée")
 
+    # Recalcul d'itinéraire : inchangé tant que tout est fluide, contournement une fois la route directe bloquée
+    q = preparer(1)
+    u = lancer(q, "E3", "E4", True)
+    avant = list(u.trajet.route)
+    q.recalculer(u)
+    assert u.trajet.route == avant and u.recalculs == 0
+    q.executer({"nom": "route", "route": "h34", "etat": "bloquee"})
+    q.recalculer(u)
+    assert "h34" not in [rid for rid, _ in u.trajet.route] and u.recalculs == 1
+    print("recalcul : itinéraire gardé si fluide, changé quand la route devant est bloquée")
+
     q = preparer(7)
     assert q.executer({"nom": "fin_urgence"}) is not None
     lancer(q, "E3", "E4", True)

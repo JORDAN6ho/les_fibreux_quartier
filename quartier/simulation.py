@@ -350,6 +350,9 @@ class Quartier:
         cle = u.trajet.route[j]
         nom, axe = ARRIVEES[cle]
         n = self.noeuds[nom]
+        # Si l'ambulance a changé d'itinéraire, elle peut arriver par l'autre axe : on refait la réservation
+        if n.forcage and n.forcage["amb"] == u.ident and n.forcage["axe"] != axe:
+            n.forcage = None
         if n.forcage is None:
             # Stratégie choisie une seule fois :
             # dégagement si au moins 3 véhicules sont devant l'ambulance, sinon onde verte

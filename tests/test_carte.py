@@ -27,6 +27,7 @@ def main():
     print("OK : graphe des routes cohérent (deux sens par route)")
     # Dijkstra : route directe si tout est fluide, contournement si la directe coûte trop, rien si tout est coupé
     def cout(rid, sens):
+        """Coût d'une route pour Dijkstra : sa longueur, sans tenir compte du trafic."""
         return carte.LONGUEURS[(rid, sens)]
     route, total = carte.itineraire("E3", "E4", cout)
     assert [rid for rid, _ in route] == ["e3", "h34", "e4"] and total < math.inf

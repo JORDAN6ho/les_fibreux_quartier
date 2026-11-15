@@ -275,13 +275,13 @@ bleu) et **le panneau de commande** à droite (état de la connexion, boutons, s
 
 ```bash
 python3 -m tests                    # tous les tests d'un coup (quelques secondes)
-python3 -m tests.test_simulation    # itinéraires, urgences, stabilité, priorité contre sans priorité
+python3 -m tests.test_simulation    # itinéraires, recalcul, urgences, stabilité, priorité contre sans priorité
 python3 -m tests.test_reseau        # échange client/serveur en TCP
 python3 -m tests.test_protocole     # messages JSON (aller-retour, accents, ligne illisible)
 python3 -m tests.test_config        # ordre de priorité de la configuration, port invalide
 python3 -m tests.test_base          # enregistrement et relecture des trajets dans sqlite3
 python3 -m tests.test_carte         # géométrie, graphe des routes, Dijkstra, trajets
-python3 -m tests.test_feux          # cycle des feux, forçage pour l'ambulance, tout-rouge de sécurité
+python3 -m tests.test_feux          # cycle des feux, forçage, onde verte ou dégagement, changement d'axe, tout-rouge
 python3 -m tests.test_commandes     # commandes invalides refusées sans faire planter le serveur
 python3 -m tests.test_etat          # contenu du message d'état et statistiques
 python3 -m tests.test_outils        # outil d'affichage des trajets

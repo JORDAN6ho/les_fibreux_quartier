@@ -236,6 +236,24 @@ Sur la VM 1, après `bash install.sh serveur`, `python3` suffit : le serveur n'u
 
 ## Utilisation du client
 
+La fenêtre a deux parties : **la carte** à gauche (carrefours, feux, véhicules, itinéraire de l'ambulance en
+bleu) et **le panneau de commande** à droite (état de la connexion, boutons, statistiques).
+
+### Premier essai : un scénario en 4 étapes
+
+1. **Observer le trafic normal** : laisser « Trafic automatique » coché quelques secondes. Les voitures entrent,
+   respectent les feux et ressortent ; les contournements restent vides, car les routes directes sont plus
+   courtes.
+2. **Lancer une ambulance prioritaire** : départ E3, arrivée E4, gravité 2, « Avec priorité » coché, puis
+   « Lancer l'ambulance ». Son itinéraire s'affiche en bleu, le bandeau rouge apparaît, les feux passent au
+   vert devant elle. Noter « Trajet ambulance avec priorité » dans les statistiques (environ 11 s).
+3. **Comparer sans priorité** : décocher « Avec priorité » et relancer le même trajet. L'ambulance s'arrête
+   aux feux comme les autres : « Trajet ambulance sans priorité » est environ trois fois plus long.
+4. **Bloquer une route** : cliquer deux fois sur la route directe Q3-Q4 (dense, puis bloquée), puis relancer
+   une ambulance prioritaire E3 vers E4 : elle passe par le contournement du bas.
+
+### Les commandes en détail
+
 - **Lancer l'ambulance** : choisir départ, arrivée et gravité (1 à 3), puis le bouton rouge. Décocher « Avec
   priorité » pour lancer une ambulance sans régulation et comparer les temps de trajet dans les statistiques.
 - **Arrêter l'urgence** : retire les ambulances en cours ; les feux reviennent au cycle normal après une phase

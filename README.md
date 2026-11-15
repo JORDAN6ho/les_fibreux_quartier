@@ -334,10 +334,10 @@ tests/                      tests automatiques (bibliothèque standard), lancés
 
 ## Fonctionnalités (voir le Bilan_Projet.pdf)
 
-Faites : séparation serveur/client sur deux machines, quartier à 4 carrefours et 2 contournements, feux,
-véhicules qui roulent à droite et respectent les feux, mesure du trafic par route, itinéraire pondéré par le
-trafic, événements (route dense ou bloquée), priorité d'urgence anticipée, stratégie adaptative et recalcul,
-statistiques, stockage sqlite3, comparaison avec et sans priorité, installation et auto-recette.
+| Priorité (cahier des charges) | Faites | Non développées |
+| --- | --- | --- |
+| **Must have** (14 sur 14) | Séparation serveur/client sur deux machines, quartier à 4 carrefours et 2 contournements, feux, véhicules qui roulent à droite et respectent les feux, protocole JSON, client Qt avec signaux et slots, mesure du trafic par route, itinéraire pondéré par le trafic (Dijkstra), choix automatique du contournement, événements (route dense ou bloquée), priorité d'urgence anticipée, stratégie adaptative et recalcul, installation et auto-recette | — |
+| **Should have** (3 sur 6) | Statistiques stockées en base (sqlite3), comparaison avec et sans priorité, panneau de commande (ajout avec limite, trafic automatique, arrêt de l'urgence) | Piétons et passages piétons, arbitrage entre plusieurs urgences simultanées, ambulance en client socket indépendant |
+| **Could have** | — | Vélos, mode jour et nuit, météo, historique rejouable, graphiques |
 
-Non développées : piétons et passages piétons, arbitrage entre plusieurs urgences simultanées, ambulance en
-client socket indépendant, vélos, mode jour et nuit, météo, historique rejouable, graphiques.
+Le détail (ce qui le prouve dans le code et les tests) est dans le [`Bilan_Projet.pdf`](Bilan_Projet.pdf).

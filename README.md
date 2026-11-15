@@ -11,6 +11,26 @@ Simulation d'un quartier de 4 carrefours (Q1 à Q4) reliés par 6 routes, dont 2
 bouchons du moment (Dijkstra), les carrefours qu'elle va traverser sont préparés à l'avance, et l'itinéraire
 est recalculé si une route se bloque.
 
+> **En une phrase :** une ambulance prioritaire traverse le quartier en environ **11 s au lieu de 33 s**, et
+> contourne seule une route bloquée.
+
+## Sommaire
+
+1. [Livrables](#livrables)
+2. [Démarrage rapide sur un seul poste](#démarrage-rapide-sur-un-seul-poste)
+3. [Comment ça marche](#comment-ça-marche)
+4. [Architecture](#architecture)
+5. [Protocole](#protocole)
+6. [Installation sur deux machines](#installation-environ-10-minutes-par-machine-ubuntu-2204-ou-debian-12)
+7. [Configuration réseau](#configuration-réseau)
+8. [Lancement](#lancement)
+9. [Utilisation du client](#utilisation-du-client)
+10. [Tests](#tests)
+11. [Dépannage](#dépannage)
+12. [Structure](#structure)
+13. [Travailler sur le dépôt](#travailler-sur-le-dépôt)
+14. [Fonctionnalités](#fonctionnalités-voir-le-bilan_projetpdf)
+
 ## Architecture
 
 Deux programmes qui communiquent par sockets TCP (messages JSON, un par ligne) :

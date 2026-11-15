@@ -142,6 +142,29 @@ Deux programmes qui communiquent par sockets TCP (messages JSON, un par ligne) :
 Messages : `commande` (client vers serveur : lancer ou arrêter une urgence, route dense ou bloquée, ajout de
 voiture, trafic automatique), `etat` (avec l'itinéraire de chaque ambulance) (serveur vers client, 11 fois par seconde), `erreur` (commande refusée).
 
+```
+   VM 2 : client.py                               VM 1 : serveur.py
+ ┌───────────────────────┐   commande (JSON)   ┌──────────────────────────┐
+ │ Fenêtre PyQt6         │ ──────────────────► │ Thread par client        │
+ │   ▲ signal Qt         │                     │   └► Quartier.executer() │
+ │ QThread ClientReseau  │ ◄────────────────── │ Boucle de simulation     │
+ └───────────────────────┘   etat (JSON)       │   (33 pas par seconde)   │
+                             11 fois/s         └──────────────────────────┘
+```
+
+**Threads du serveur** (`quartier/serveur_reseau.py`, `serveur.py`) :
+
+- un thread qui **accepte** les nouvelles connexions ;
+- un thread **par client**, qui lit ses commandes ligne par ligne ;
+- la **boucle de simulation**, dans le thread principal : 33 pas par seconde, et l'état est envoyé à tous les
+  clients un pas sur trois ;
+- un `Lock` protège la simulation (une commande ne la modifie pas pendant un pas) et un autre la liste des
+  clients ; un `Event` arrête proprement la boucle au Ctrl+C.
+
+**Thread du client** (`quartier/client_reseau.py`) : la connexion tourne dans un `QThread` qui émet un
+`pyqtSignal` à chaque message reçu. La fenêtre reçoit ce signal dans le thread de Qt : **aucun thread ne
+modifie l'interface directement**, comme l'exige Qt.
+
 ## Protocole
 
 Un message JSON par ligne, encodé en UTF-8 (`quartier/serveur_reseau.py`). Exemples :

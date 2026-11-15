@@ -1,5 +1,11 @@
 # Historique des versions
 
+## Non publiée (15/11/2026)
+
+- Correctif : une ambulance prioritaire ne reste plus bloquée au rouge après un recalcul d'itinéraire.
+  Quand elle arrive par l'autre axe d'un carrefour qu'elle avait déjà réservé, la réservation est refaite
+  sur le bon axe (`Quartier.forcer`). Test de non-régression ajouté dans `tests/test_feux.py`.
+
 ## 1.1 (31/10/2026)
 
 - Dépôt de test du déploiement devenu le dépôt principal du projet.

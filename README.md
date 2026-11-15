@@ -47,6 +47,31 @@ Documents complémentaires : [`CHANGELOG.md`](CHANGELOG.md) (historique des vers
 [`AUTO_RECETTE.md`](AUTO_RECETTE.md) (résultats de la recette sur deux machines vierges) et
 [`GUIDE_RECETTE.md`](GUIDE_RECETTE.md) (guide pour rejouer cette recette).
 
+## Démarrage rapide sur un seul poste
+
+Pour essayer le projet sur une seule machine (Ubuntu, Debian ou WSL sous Windows), le serveur et le client
+tournent côte à côte. `config.ini` pointe déjà sur `127.0.0.1` (la machine elle-même).
+
+```bash
+git clone https://github.com/JORDAN6ho/les_fibreux_quartier.git les_fibreux_quartier
+cd les_fibreux_quartier
+bash install.sh client             # une seule fois : crée le venv et installe PyQt6
+```
+
+Puis dans **deux terminaux**, dans cet ordre :
+
+```bash
+python3 serveur.py                 # terminal 1 : le serveur, à laisser tourner
+./venv/bin/python client.py        # terminal 2 : la fenêtre du quartier
+```
+
+> **Toujours lancer le serveur en premier.** Sans serveur, le client affiche « Connexion impossible » et les
+> boutons « Ajouter une voiture » et « Lancer l'ambulance » restent vides : leur texte (avec les compteurs)
+> vient du serveur.
+
+Sous WSL, la fenêtre s'affiche grâce à WSLg (Windows 11 ou Windows 10 à jour). Pour le déploiement réel sur deux
+machines, voir [Installation sur deux machines](#installation-environ-10-minutes-par-machine-ubuntu-2204-ou-debian-12).
+
 ## Architecture
 
 Deux programmes qui communiquent par sockets TCP (messages JSON, un par ligne) :

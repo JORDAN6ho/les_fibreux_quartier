@@ -2,7 +2,10 @@
 
 Lancer depuis la racine : python -m tests.test_feux
 """
-from quartier.simulation import CYCLE, ORANGE, TOUT_ROUGE, VERT, Noeud, freinage, moyenne
+from types import SimpleNamespace
+
+from quartier.carte import ARRIVEES
+from quartier.simulation import CYCLE, ORANGE, TOUT_ROUGE, VERT, Noeud, Quartier, freinage, moyenne
 
 
 def couleurs(noeud, pas):
@@ -39,6 +42,21 @@ def main():
     assert couleurs(n, 3) == [{"ew": "rouge", "ns": "rouge"}] * 3
     assert n.t == 0 and n.etat() == {"ew": "vert", "ns": "rouge"}
     print("OK : tout-rouge de sécurité puis reprise du cycle")
+    # Non-régression : après un recalcul d'itinéraire, l'ambulance arrive par l'autre axe du même carrefour.
+    # La réservation doit passer sur le nouvel axe, sinon le vert reste sur l'ancien et l'ambulance est bloquée.
+    q = Quartier(None)
+    noeud = "Q2"
+    cle_ew = next(c for c, (nom, axe) in ARRIVEES.items() if nom == noeud and axe == "ew")
+    cle_ns = next(c for c, (nom, axe) in ARRIVEES.items() if nom == noeud and axe == "ns")
+    amb = SimpleNamespace(ident=1, so=0.0, trajet=SimpleNamespace(route=[cle_ew]))
+    assert q.forcer(amb, 0, 100) == noeud and q.noeuds[noeud].forcage["axe"] == "ew"
+    amb.trajet.route = [cle_ns]  # nouvel itinéraire : arrivée par l'axe nord-sud
+    assert q.forcer(amb, 0, 100) == noeud and q.noeuds[noeud].forcage["axe"] == "ns"
+    assert q.noeuds[noeud].etat()["ns"] == "vert"
+    # Une autre ambulance ne doit pas pouvoir prendre la réservation
+    autre = SimpleNamespace(ident=2, so=0.0, trajet=SimpleNamespace(route=[cle_ew]))
+    assert q.forcer(autre, 0, 100) is None and q.noeuds[noeud].forcage["amb"] == 1
+    print("OK : réservation d'un carrefour mise à jour après un changement d'axe de l'ambulance")
     # Petites fonctions : moyenne qui ignore les valeurs manquantes, freinage borné
     assert moyenne([]) is None and moyenne([None, 2, 4]) == 3
     assert freinage(0, 3) == 0 and freinage(1000, 3) == 3 and 0 < freinage(10, 3) < 3

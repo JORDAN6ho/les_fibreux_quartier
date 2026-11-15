@@ -105,6 +105,7 @@ class ServeurTCP:
             # OSError : la connexion est coupée, False prévient diffuser que ce client n'est plus là.
 
     def gerer_client(self, conn):
+        """Lit les messages d'un client (un par ligne) et exécute ses commandes, jusqu'à sa déconnexion."""
     # conn : la connexion avec un client, donnée par accepter().
         try:
             with conn.makefile("rb") as flux:

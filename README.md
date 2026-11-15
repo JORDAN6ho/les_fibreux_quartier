@@ -31,6 +31,22 @@ est recalculé si une route se bloque.
 13. [Travailler sur le dépôt](#travailler-sur-le-dépôt)
 14. [Fonctionnalités](#fonctionnalités-voir-le-bilan_projetpdf)
 
+## Livrables
+
+Tous les livrables demandés sont à la racine du dépôt :
+
+| Fichier | Contenu |
+| --- | --- |
+| `README.md` | Ce document : présentation, installation, utilisation, tests, dépannage |
+| `requirements.txt` | Bibliothèques du client avec leurs versions exactes (PyQt6) |
+| `serveur.py`, `client.py`, `quartier/` | Le code, commenté, avec des docstrings |
+| [`Bilan_Projet.pdf`](Bilan_Projet.pdf) | Bilan du projet : fonctionnalités faites ou non par rapport au cahier des charges (Must, Should, Could have), conclusions technique et organisationnelle, planning prévu et réalisé, heures relevées par semaine |
+| [`IAGraphie.pdf`](IAGraphie.pdf) | Usage de l'IA dans le projet : ce qui a été fait par nous et par l'IA à chaque phase, demandes principales, regard critique, vérifications et réflexion éthique |
+
+Documents complémentaires : [`CHANGELOG.md`](CHANGELOG.md) (historique des versions),
+[`AUTO_RECETTE.md`](AUTO_RECETTE.md) (résultats de la recette sur deux machines vierges) et
+[`GUIDE_RECETTE.md`](GUIDE_RECETTE.md) (guide pour rejouer cette recette).
+
 ## Architecture
 
 Deux programmes qui communiquent par sockets TCP (messages JSON, un par ligne) :

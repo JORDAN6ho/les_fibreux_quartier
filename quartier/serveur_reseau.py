@@ -1,3 +1,4 @@
+"""Serveur TCP : accepte les clients, exécute leurs commandes et diffuse l'état de la simulation."""
 import time
 import logging
 import json

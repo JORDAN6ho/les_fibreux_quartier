@@ -20,6 +20,7 @@ def decoder(ligne):
 class ServeurTCP:
     """Utilise un thread pour chaque client."""
     def __init__(self, quartier, hote, port):
+        """Prépare le serveur (adresse, port, liste de clients) sans ouvrir de connexion."""
         self.quartier = quartier  # quartier : la simulation, pour exécuter les commandes des clients
         self.hote = hote  # hote : l'adresse IP où le serveur écoute
         self.port = port  # port : le numéro de port (lu dans config.ini)

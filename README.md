@@ -317,6 +317,8 @@ quartier/client_reseau.py   connexion du client (QThread)
 quartier/dessin.py, ihm.py  carte et fenêtre PyQt6
 quartier/config.py, base.py
 outils/trajets.py           affichage des trajets enregistrés dans stats.db
+Bilan_Projet.pdf            bilan du projet (livrable)
+IAGraphie.pdf               usage de l'IA dans le projet (livrable)
 CHANGELOG.md                historique des versions
 AUTO_RECETTE.md             tableau de recette sur deux machines vierges (résultats des passes)
 GUIDE_RECETTE.md            guide pas à pas pour rejouer la recette

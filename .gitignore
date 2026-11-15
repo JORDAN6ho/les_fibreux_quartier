@@ -7,3 +7,5 @@ __pycache__/
 .idea/
 .DS_Store
 Thumbs.db
+# Fichiers créés par Windows quand on copie un fichier dans WSL
+*:Zone.Identifier

@@ -188,30 +188,3 @@ elle-même) et affiche « Connexion impossible ».
 | 7 | VM 1 et 2 | Ctrl+C sur le serveur, puis le relancer ; fermer et relancer le client | Le client affiche « Connexion perdue », puis se reconnecte | |
 | 8 | VM 2 | `python3 -m tests` depuis le dossier du projet | « Tous les tests sont passés » | |
 | 9 | VM 1 | `python3 -m outils.trajets` | Les trajets d'ambulance s'affichent, avec la moyenne avec et sans priorité | |
-
-## Historique des passes
-
-### Passe 1 : 21/10/2026, PC de l'IUT (Jordan HO)
-
-Images Debian 12 du Disque Commun de l'IUT, VM rangées dans `C:\Temp`, VirtualBox sans droits administrateur. Cinq écarts trouvés et corrigés :
-
-| | Écart | Correction |
-| --- | --- | --- |
-| A | `sudo` refusé : « toto is not in the sudoers file » | `su -`, `usermod -aG sudo toto`, puis redémarrage de la VM ou `su - toto` (étape 4) |
-| B | Menu de création du réseau NAT introuvable ; en « NAT » simple, les VM ne se voient pas | Réseau créé avec `VBoxManage natnetwork add` (étape 1), mode « Réseau NAT » (étape 2) |
-| C | Client : « Connexion impossible », il visait `127.0.0.1` | Adresse de la VM 1 donnée au client (aujourd'hui avec `--hote`, étapes 8 et 9) |
-| D | `bash install.sh client` affiche « Usage : ... » | Argument retapé exactement |
-| E | Une image « Serveur Debian 12 » ne démarrait pas | Remplacée par l'image Debian 12 du Disque Commun |
-
-### Passe 2 : 21/10/2026, même PC, depuis l'instantané « vierge » (Jordan HO)
-
-Déploiement en suivant uniquement le README : **toutes les vérifications conformes, sans écart**, en
-15 minutes au maximum (du `git clone` au client « Connecté à ... »).
-
-### Passe 3 : 25/11/2026, PC de l'IUT (Younès BACH)
-
-Déploiement en suivant les étapes ci-dessus. Un nouvel écart trouvé :
-
-| | Écart | Correction |
-| --- | --- | --- |
-| F | Client : `qt.qpa.xcb: could not connect to display`, puis `Aborted` | Le client était lancé en root (resté connecté après `su -`) : `exit`, puis installation et lancement en utilisateur normal. Avertissement ajouté à l'étape 4 et dans « Ça ne marche pas ? » |

@@ -83,13 +83,13 @@ Points à surveiller et à noter :
 | Temps | Où | Ce qu'on fait (section du README) | Ligne |
 | --- | --- | --- | --- |
 | ~0:10 | VM 1 | *Lancement* : `python3 serveur.py` | 5 |
-| ~0:11 | VM 2 | *Configuration réseau* : `nano config.ini`, mettre l'adresse de la VM 1 dans `hote_client`, enregistrer le fichier et quitter l'éditeur | 6 |
-| ~0:12 | VM 2 | `./venv/bin/python client.py`, **dans un terminal du bureau graphique** (pas en SSH) | 7 |
+| ~0:11 | VM 1 | *Configuration réseau* : revérifier l'adresse avec `hostname -I` | 6 |
+| ~0:12 | VM 2 | `./venv/bin/python client.py --hote <adresse VM 1>`, **dans un nouveau terminal du bureau graphique** (pas en SSH, pas en root) | 7 |
 | ~0:12 | VM 1 | Lire la console du serveur | 8 |
 
-- Si le client affiche « Connexion impossible » : vérifier l'adresse dans `config.ini`, puis depuis la VM 2
+- Si le client affiche « Connexion impossible » : vérifier l'adresse donnée après `--hote`, puis depuis la VM 2
   `ping <adresse VM 1>`. Si le ping échoue, c'est le réseau des VM (voir 0.2), pas le programme. Si le ping
-  passe mais pas la connexion, essayer `sudo ufw allow 5050/tcp` sur la VM 1 (comme dans le README).
+  passe mais pas la connexion, essayer `sudo ufw allow 5050/tcp` sur la VM 1.
 - Si le client s'arrête avec une erreur Qt (« xcb » ou « wayland ») : relancer `bash install.sh client`, puis
   essayer `QT_QPA_PLATFORM=xcb ./venv/bin/python client.py`. Noter le message exact : c'est un écart à corriger
   dans le README si la deuxième commande a été nécessaire.

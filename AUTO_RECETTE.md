@@ -86,7 +86,7 @@ su - toto
 hostname -I
 ```
 
-➡️ Noter l'adresse affichée (exemple : `10.0.2.4`). C'est l'adresse du serveur.
+**À noter :** l'adresse affichée (exemple : `10.0.2.4`). C'est l'adresse du serveur.
 
 ```bash
 sudo apt update && sudo apt install git -y
@@ -95,7 +95,7 @@ cd les_fibreux_quartier
 bash install.sh serveur
 ```
 
-✅ Le dernier message doit être : `Installation terminée pour le rôle : serveur`.
+**Vérifier :** le dernier message doit être : `Installation terminée pour le rôle : serveur`.
 
 ## Étape 6 : installer le client (VM 2)
 
@@ -103,7 +103,7 @@ bash install.sh serveur
 hostname -I
 ```
 
-✅ L'adresse doit être **différente** de celle de la VM 1. Si les deux VM ont `10.0.2.15`, refaire l'étape 2.
+**Vérifier :** l'adresse doit être **différente** de celle de la VM 1. Si les deux VM ont `10.0.2.15`, refaire l'étape 2.
 
 ```bash
 sudo apt update && sudo apt install git -y
@@ -112,7 +112,7 @@ cd les_fibreux_quartier
 bash install.sh client
 ```
 
-✅ Le dernier message doit être : `Installation terminée pour le rôle : client`.
+**Vérifier :** le dernier message doit être : `Installation terminée pour le rôle : client`.
 
 ## Étape 7 : lancer le serveur (VM 1)
 
@@ -120,9 +120,9 @@ bash install.sh client
 python3 serveur.py
 ```
 
-✅ Le serveur affiche qu'il est en écoute sur `0.0.0.0:5050`.
+**Vérifier :** le serveur affiche qu'il est en écoute sur `0.0.0.0:5050`.
 
-⚠️ **Laisser ce terminal ouvert** : fermer le terminal arrête le serveur.
+**Attention : laisser ce terminal ouvert** : fermer le terminal arrête le serveur.
 
 ## Étape 8 : donner l'adresse du serveur au client (VM 2)
 
@@ -146,7 +146,7 @@ Enregistrer et quitter : **Ctrl+O**, **Entrée**, **Ctrl+X**.
 ./venv/bin/python client.py
 ```
 
-✅ La fenêtre du quartier s'ouvre, le statut indique « Connecté à 10.0.2.4:5050 » et les voitures roulent.
+**Vérifier :** la fenêtre du quartier s'ouvre, le statut indique « Connecté à 10.0.2.4:5050 » et les voitures roulent.
 
 Autre possibilité, sans modifier `config.ini` : `./venv/bin/python client.py --hote 10.0.2.4`
 

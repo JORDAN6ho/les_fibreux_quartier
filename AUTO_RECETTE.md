@@ -116,7 +116,11 @@ bash install.sh client
 
 ## Étape 7 : lancer le serveur (VM 1)
 
+⚠️ **Ouvrir absolument un nouveau terminal pour lancer le serveur, pour être sûr d'être un utilisateur simple :
+l'invite doit être `toto@...$`, et pas `root@...#`.**
+
 ```bash
+cd les_fibreux_quartier
 python3 serveur.py
 ```
 
@@ -151,7 +155,11 @@ Enregistrer le fichier et quitter l'éditeur.
 
 ## Étape 9 : lancer le client (VM 2, en toto)
 
+⚠️ **Ouvrir absolument un nouveau terminal pour lancer le client, pour être sûr d'être un utilisateur simple :
+l'invite doit être `toto@...$`, et pas `root@...#`.**
+
 ```bash
+cd les_fibreux_quartier
 ./venv/bin/python client.py
 ```
 

@@ -237,18 +237,15 @@ Chaque installation se termine par `Installation terminée pour le rôle : ...`.
 
 ## Configuration réseau
 
-Sur la VM 2, mettre l'adresse de la VM 1 dans `config.ini` :
+Le client reçoit l'adresse du serveur avec l'option `--hote`. Juste avant de lancer le client, **revérifier
+l'adresse de la VM 1** :
 
 ```bash
-nano config.ini
+hostname -I                         # sur la VM 1, ex. 10.0.2.4
 ```
 
-```ini
-hote_client = 10.0.2.4
-```
-
-Revérifier l'adresse avec `hostname -I` sur la VM 1, puis enregistrer le fichier et quitter l'éditeur. Le port
-par défaut est 5050.
+Le port par défaut est 5050. L'option `--hote` passe avant `config.ini` : il n'y a pas besoin de modifier ce
+fichier.
 
 ## Lancement
 
@@ -259,12 +256,13 @@ d'être un utilisateur simple : l'invite doit être `toto@...$`, et pas `root@..
 
 ```bash
 cd les_fibreux_quartier
-python3 serveur.py                  # VM 1 : laisser le terminal ouvert (Ctrl+C pour arrêter)
-./venv/bin/python client.py         # VM 2
+python3 serveur.py                             # VM 1 : laisser le terminal ouvert (Ctrl+C pour arrêter)
+./venv/bin/python client.py --hote 10.0.2.4    # VM 2 : avec l'adresse de la VM 1 (hostname -I)
 ```
 
-La fenêtre s'ouvre avec le statut « Connecté à 10.0.2.4:5050 ». Sans modifier `config.ini`, on peut aussi lancer
-`./venv/bin/python client.py --hote 10.0.2.4`.
+**Lancer le client uniquement avec `--hote` suivi de l'adresse de la VM 1.** Sans `--hote`, il vise
+`127.0.0.1` (la VM 2 elle-même) et affiche « Connexion impossible ». La fenêtre s'ouvre avec le statut
+« Connecté à 10.0.2.4:5050 ».
 
 Le détail de chaque étape, les vérifications et les problèmes fréquents sont dans
 [`AUTO_RECETTE.md`](AUTO_RECETTE.md).
@@ -331,7 +329,7 @@ push (onglet *Actions*, fichier `.github/workflows/tests.yml`).
 | Symptôme | Solution |
 | --- | --- |
 | `... n'est pas dans le fichier sudoers` | `su -`, `usermod -aG sudo toto`, `exit`, puis redémarrer la VM ou taper `su - toto` |
-| Client : « Connexion impossible » | Vérifier `hote_client` dans `config.ini`, puis `ping <adresse VM 1>` ; sous VirtualBox, mettre les deux VM en « Réseau NAT » commun |
+| Client : « Connexion impossible » | Vérifier que le client est lancé avec `--hote` et la bonne adresse (`hostname -I` sur la VM 1), puis `ping <adresse VM 1>` ; sous VirtualBox, mettre les deux VM en « Réseau NAT » commun |
 | Serveur : « impossible d'écouter » | Un ancien serveur tourne encore : `pkill -f serveur.py`, puis relancer |
 | Serveur : « port invalide » | Corriger `port` dans `config.ini` (nombre entre 1 et 65535) |
 | Client : erreur Qt « xcb » | Relancer `bash install.sh client`, ou essayer `QT_QPA_PLATFORM=xcb ./venv/bin/python client.py` |

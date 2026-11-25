@@ -41,7 +41,7 @@ Tous les livrables demandés sont à la racine du dépôt :
 | [`IAGraphie.pdf`](IAGraphie.pdf) | Usage de l'IA dans le projet : ce qui a été fait par nous et par l'IA à chaque phase, demandes principales, regard critique, vérifications et réflexion éthique |
 
 Documents complémentaires : [`CHANGELOG.md`](CHANGELOG.md) (historique des versions),
-[`AUTO_RECETTE.md`](AUTO_RECETTE.md) (résultats de la recette sur deux machines vierges) et
+[`AUTO_RECETTE.md`](AUTO_RECETTE.md) (déploiement pas à pas sur deux VM et vérifications) et
 [`GUIDE_RECETTE.md`](GUIDE_RECETTE.md) (guide pour rejouer cette recette).
 
 ## Démarrage rapide sur un seul poste
@@ -124,7 +124,7 @@ qu'aucune route n'est rendue dense ou bloquée : c'est voulu, ils servent en cas
 3. **Les voitures se serrent à droite** sur la route de l'ambulance (bandeau « Il faut se serrer à droite ! »).
 4. **Recalcul d'itinéraire** environ une fois par seconde : l'ambulance change de chemin si le sien est bloqué ou
    si un autre est au moins 15 % moins cher. Si elle arrive alors par l'autre axe d'un carrefour déjà
-   réservé, la réservation passe sur le nouvel axe (correctif du 15/11).
+   réservé, la réservation passe sur le nouvel axe.
 5. **Après le passage** : tout-rouge de sécurité de 2 s, puis le carrefour reprend son cycle normal.
 
 ## Architecture
@@ -353,7 +353,7 @@ outils/trajets.py           affichage des trajets enregistrés dans stats.db
 Bilan_Projet.pdf            bilan du projet (livrable)
 IAGraphie.pdf               usage de l'IA dans le projet (livrable)
 CHANGELOG.md                historique des versions
-AUTO_RECETTE.md             tableau de recette sur deux machines vierges (résultats des passes)
+AUTO_RECETTE.md             déploiement pas à pas sur deux VM et vérifications
 GUIDE_RECETTE.md            guide pas à pas pour rejouer la recette
 tests/                      tests automatiques (bibliothèque standard), lancés par python3 -m tests
 ```

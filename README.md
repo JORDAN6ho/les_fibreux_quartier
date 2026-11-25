@@ -247,7 +247,8 @@ nano config.ini
 hote_client = 10.0.2.4
 ```
 
-Enregistrer : **Ctrl+O**, **Entrée**, **Ctrl+X**. Le port par défaut est 5050.
+Revérifier l'adresse avec `hostname -I` sur la VM 1, puis enregistrer le fichier et quitter l'éditeur. Le port
+par défaut est 5050.
 
 ## Lancement
 

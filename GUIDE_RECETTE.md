@@ -37,7 +37,8 @@ faire en dehors du README est un écart : on le note, puis on corrige le README.
    Avec VMware : « NAT » ou « Bridged » sur les deux, c'est bon dans les deux cas.
 3. Vérifier que l'utilisateur peut faire `sudo` : `sudo true` ne doit pas répondre « n'est pas dans le fichier
    sudoers ». Sur Debian 12, si un mot de passe root a été donné à l'installation, l'utilisateur n'a pas `sudo` :
-   `su -`, puis `usermod -aG sudo <utilisateur>`, puis se déconnecter et se reconnecter.
+   `su -`, puis `usermod -aG sudo <utilisateur>`, `exit`, puis redémarrer la VM (ou, plus rapide,
+   `su - <utilisateur>` dans le terminal).
 4. Vérifier qu'Internet marche dans chaque VM (`ping -c 2 deb.debian.org`).
 5. Sur Ubuntu, au premier démarrage, les mises à jour automatiques bloquent `apt` pendant quelques minutes
    (« Could not get lock »). Attendre qu'elles finissent avant de lancer le chrono.

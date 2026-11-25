@@ -4,10 +4,22 @@
 
 - **VM 1 = serveur** : elle simule le quartier.
 - **VM 2 = client** : elle affiche la carte (bureau graphique obligatoire).
-- **Matériel** : un PC Windows avec Oracle VirtualBox et deux VM Debian 12 (ou Ubuntu 22.04).
+- **Matériel** : un PC Windows de l'IUT avec Oracle VirtualBox, et deux VM créées à partir de l'image
+  **Debian 12 du Disque Commun** de l'IUT, rangées dans **`C:\Temp`**.
 
 > Dans les commandes, `toto` est le nom de l'utilisateur de la VM et `10.0.2.4` l'adresse de la VM 1 :
 > remplacez-les par les vôtres.
+
+## Étape 0 : importer les deux VM (VirtualBox)
+
+Ne pas installer Debian soi-même : prendre l'image **Debian 12 du Disque Commun**.
+
+1. Dans VirtualBox : **Fichier → Importer un appareil virtuel**, puis choisir l'image Debian 12 du Disque Commun.
+2. Dans les réglages de l'import :
+   - **Nom** : `Serveur_lesFibreux` ;
+   - **Dossier de base des machines** : **`C:\Temp`** ;
+   - **Politique d'adresse MAC** : générer de nouvelles adresses MAC pour toutes les cartes réseau.
+3. Refaire la même chose pour la deuxième VM, avec le nom `Client_lesFibreux`, toujours dans `C:\Temp`.
 
 ## Étape 1 : créer le réseau des deux VM (PC Windows)
 
@@ -138,6 +150,7 @@ Autre possibilité, sans modifier `config.ini` : `./venv/bin/python client.py --
 | `could not connect to display` puis `Aborted` | Le client est lancé en root : taper `exit`, vérifier que l'invite est `toto@...$`, relancer |
 | Client : « Connexion impossible » | Serveur pas lancé (étape 7), mauvaise adresse dans `config.ini` (étape 8), ou VM pas en « Réseau NAT » (étape 2) |
 | Les deux VM ont l'adresse `10.0.2.15` | Elles sont en « NAT » simple : refaire l'étape 2 |
+| Les deux VM ont la même adresse, mais pas `10.0.2.15` | Même adresse MAC (la même image importée deux fois) : réimporter la VM 2 en générant de nouvelles adresses MAC (étape 0) |
 | `bash install.sh` affiche « Usage : ... » | Retaper exactement `bash install.sh serveur` ou `bash install.sh client` |
 | Serveur : « impossible d'écouter » | Un ancien serveur tourne encore : `pkill -f serveur.py`, puis relancer |
 | Erreur Qt « xcb » alors que l'invite est bien `toto@...$` | Relancer `bash install.sh client`, puis `QT_QPA_PLATFORM=xcb ./venv/bin/python client.py` |
@@ -162,7 +175,7 @@ Autre possibilité, sans modifier `config.ini` : `./venv/bin/python client.py --
 
 ### Passe 1 : 21/10/2026, PC de l'IUT (Jordan HO)
 
-Images Debian 12 de l'IUT, VirtualBox sans droits administrateur. Cinq écarts trouvés et corrigés :
+Images Debian 12 du Disque Commun de l'IUT, VM rangées dans `C:\Temp`, VirtualBox sans droits administrateur. Cinq écarts trouvés et corrigés :
 
 | | Écart | Correction |
 | --- | --- | --- |
@@ -170,7 +183,7 @@ Images Debian 12 de l'IUT, VirtualBox sans droits administrateur. Cinq écarts t
 | B | Menu de création du réseau NAT introuvable ; en « NAT » simple, les VM ne se voient pas | Réseau créé avec `VBoxManage natnetwork add` (étape 1), mode « Réseau NAT » (étape 2) |
 | C | Client : « Connexion impossible », il visait `127.0.0.1` | `hote_client` modifié et enregistré dans `config.ini` (étape 8) |
 | D | `bash install.sh client` affiche « Usage : ... » | Argument retapé exactement |
-| E | Une image « Serveur Debian 12 » ne démarrait pas | Remplacée par une autre image Debian 12 de l'IUT |
+| E | Une image « Serveur Debian 12 » ne démarrait pas | Remplacée par l'image Debian 12 du Disque Commun |
 
 ### Passe 2 : 21/10/2026, même PC, depuis l'instantané « vierge » (Jordan HO)
 

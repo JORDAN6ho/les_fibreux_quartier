@@ -254,9 +254,13 @@ par défaut est 5050.
 
 **Toujours le serveur d'abord, puis le client.**
 
+⚠️ **Sur les deux VM, ouvrir absolument un nouveau terminal pour lancer le serveur et le client, pour être sûr
+d'être un utilisateur simple : l'invite doit être `toto@...$`, et pas `root@...#`.**
+
 ```bash
+cd les_fibreux_quartier
 python3 serveur.py                  # VM 1 : laisser le terminal ouvert (Ctrl+C pour arrêter)
-./venv/bin/python client.py         # VM 2 : en utilisateur normal, pas en root
+./venv/bin/python client.py         # VM 2
 ```
 
 La fenêtre s'ouvre avec le statut « Connecté à 10.0.2.4:5050 ». Sans modifier `config.ini`, on peut aussi lancer

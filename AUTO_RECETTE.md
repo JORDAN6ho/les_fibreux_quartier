@@ -1,60 +1,186 @@
-# Auto-recette : déploiement sur deux machines vierges
+# Auto-recette : déploiement sur deux machines virtuelles
 
-Durée visée : 15 minutes. Deux machines virtuelles Linux (Ubuntu 22.04 ou Debian 12) sur le même réseau.
-VM 1 = serveur, VM 2 = client (avec bureau graphique). Noter les écarts dans la colonne « Observé ».
+**Objectif :** lancer le projet sur deux VM vierges en **15 minutes**, en suivant les étapes dans l'ordre.
 
-## Passe 1 : 21/10/2026, PC de l'IUT (Jordan HO, seul)
+- **VM 1 = serveur** : elle simule le quartier.
+- **VM 2 = client** : elle affiche la carte (bureau graphique obligatoire).
+- **Matériel** : un PC Windows avec Oracle VirtualBox et deux VM Debian 12 (ou Ubuntu 22.04).
 
-- **Hôte** : PC Windows de l'IUT, Oracle VirtualBox, sans droits administrateur. VM rangées dans `C:\Temp`.
-- **VM** : images Debian 12 fournies par l'IUT (OVA), avec bureau graphique. VM 1 `Serveur_lesFibreux` en
-  10.0.2.3, VM 2 `Client_lesFibreux` (4 Go de mémoire) en 10.0.2.4.
-- **Réseau** : « Réseau NAT » VirtualBox nommé `NatNetwork`, DHCP activé, commun aux deux VM.
-- **Dépôt utilisé** : https://github.com/JORDAN6ho/les_fibreux_quartier (version commentée ; dépôt de test à l'époque, devenu le dépôt principal le 31/10/2026).
-- **Durée** : passe non chronométrée, faite en découvrant les VM et en corrigeant les écarts au fur et à mesure.
-  Le temps de déploiement est à mesurer à la passe 2, en repartant de l'instantané « vierge ».
-- **Lignes 8 à 14** : jouées après les lignes 1 à 7, toutes conformes.
+> Dans les commandes, `toto` est le nom de l'utilisateur de la VM et `10.0.2.4` l'adresse de la VM 1 :
+> remplacez-les par les vôtres.
 
-### Écarts relevés
+## Étape 1 : créer le réseau des deux VM (PC Windows)
 
-| | Écart | Cause | Correction |
-| --- | --- | --- | --- |
-| A | `sudo` : « toto is not in the sudoers file » sur les deux VM | Sur Debian, l'utilisateur créé n'a pas les droits sudo | `su -` puis `usermod -aG sudo toto`, déconnexion et reconnexion. Ajouté au README |
-| B | Le menu de création du réseau NAT est introuvable dans VirtualBox ; avec le mode « NAT » simple, le client avait 10.0.2.15 et ne voyait pas le serveur | Interface VirtualBox réduite ; le mode « NAT » isole chaque VM | Réseau créé dans cmd : `VBoxManage natnetwork add --netname NatNetwork --network 10.0.2.0/24 --enable --dhcp on`, puis mode « Réseau NAT » sur les deux VM |
-| C | Client : « Connexion impossible : [Errno 111] Connection refused », titre de la fenêtre en `127.0.0.1:5050` | `hote_client` de `config.ini` pas modifié ou pas enregistré | Mettre l'adresse de la VM 1 dans `hote_client`, enregistrer (Ctrl+O, Entrée, Ctrl+X dans nano). `--hote` marche aussi |
-| D | `bash install.sh client` affiche « Usage : ... » | Argument mal tapé | Retaper exactement `bash install.sh client` |
-| E | L'OVA « Serveur Debian 12 » ne fonctionnait pas | Non identifiée | Remplacée par une autre image Debian 12 de l'IUT |
+Les deux VM doivent être sur le même réseau pour se parler.
 
-## Passe 2 : 21/10/2026, même PC, depuis l'instantané « vierge »
+1. Ouvrir **PowerShell**.
+2. Aller dans le dossier de VirtualBox :
 
-- Les deux VM restaurées à l'instantané « vierge », puis déploiement en suivant uniquement le README
-  (`git clone` du dépôt, `install.sh`, `config.ini`, lancement).
-- **Résultat : les lignes 1 à 14 sont toutes conformes, sans aucun écart.**
-- **Temps de déploiement** (du `git clone` au client « Connecté à ... ») : 15 minutes au maximum, dans la durée visée.
+   ```powershell
+   cd "C:\Program Files\Oracle\VirtualBox"
+   ```
 
-## Tableau de recette (passe 1)
+3. Créer le réseau :
 
-| N° | Machine | Étape | Résultat attendu | Observé |
+   ```powershell
+   .\VBoxManage.exe natnetwork add --netname NatNetwork --network 10.0.2.0/24 --enable --dhcp on
+   ```
+
+Si le message dit que `NatNetwork` existe déjà, c'est bon : passer à l'étape 2.
+
+## Étape 2 : régler les deux VM (VirtualBox, VM éteintes)
+
+Pour chaque VM, ouvrir **Configuration** :
+
+- **Réseau** → Mode d'accès : **Réseau NAT** → Nom : **NatNetwork**.
+  (Pas « NAT » tout court : avec « NAT », les VM ne se voient pas.)
+- **Affichage** → Mémoire vidéo : **128 Mo** → cocher **Activer l'accélération 3D**.
+  (Facultatif, pour un affichage plus fluide. Si l'écran reste noir, décocher l'accélération 3D.)
+- **VM 2 seulement** : Système → Mémoire vive : **4096 Mo**.
+
+## Étape 3 : démarrer les VM
+
+Démarrer la VM 1 (serveur) et la VM 2 (client), puis se connecter avec son utilisateur.
+
+## Étape 4 : donner les droits sudo (les deux VM, une seule fois)
+
+Sur Debian, l'utilisateur n'a souvent pas le droit d'utiliser `sudo`. Dans un terminal :
+
+```bash
+su -
+usermod -aG sudo toto
+exit
+```
+
+Puis **se déconnecter et se reconnecter** (menu en haut à droite → Se déconnecter).
+
+> **Vérifier :** l'invite du terminal doit afficher `toto@...$` et pas `root@...#`.
+> Toutes les étapes suivantes se font en `toto`, **jamais en root**.
+
+## Étape 5 : installer le serveur (VM 1)
+
+```bash
+hostname -I
+```
+
+➡️ Noter l'adresse affichée (exemple : `10.0.2.4`). C'est l'adresse du serveur.
+
+```bash
+sudo apt update && sudo apt install git -y
+git clone https://github.com/JORDAN6ho/les_fibreux_quartier.git
+cd les_fibreux_quartier
+bash install.sh serveur
+```
+
+✅ Le dernier message doit être : `Installation terminée pour le rôle : serveur`.
+
+## Étape 6 : installer le client (VM 2)
+
+```bash
+hostname -I
+```
+
+✅ L'adresse doit être **différente** de celle de la VM 1. Si les deux VM ont `10.0.2.15`, refaire l'étape 2.
+
+```bash
+sudo apt update && sudo apt install git -y
+git clone https://github.com/JORDAN6ho/les_fibreux_quartier.git
+cd les_fibreux_quartier
+bash install.sh client
+```
+
+✅ Le dernier message doit être : `Installation terminée pour le rôle : client`.
+
+## Étape 7 : lancer le serveur (VM 1)
+
+```bash
+python3 serveur.py
+```
+
+✅ Le serveur affiche qu'il est en écoute sur `0.0.0.0:5050`.
+
+⚠️ **Laisser ce terminal ouvert** : fermer le terminal arrête le serveur.
+
+## Étape 8 : donner l'adresse du serveur au client (VM 2)
+
+Depuis le dossier `les_fibreux_quartier` :
+
+```bash
+nano config.ini
+```
+
+Remplacer la ligne `hote_client = 127.0.0.1` par l'adresse notée à l'étape 5 :
+
+```ini
+hote_client = 10.0.2.4
+```
+
+Enregistrer et quitter : **Ctrl+O**, **Entrée**, **Ctrl+X**.
+
+## Étape 9 : lancer le client (VM 2, en toto)
+
+```bash
+./venv/bin/python client.py
+```
+
+✅ La fenêtre du quartier s'ouvre, le statut indique « Connecté à 10.0.2.4:5050 » et les voitures roulent.
+
+Autre possibilité, sans modifier `config.ini` : `./venv/bin/python client.py --hote 10.0.2.4`
+
+**C'est lancé !** Pour arrêter : fermer la fenêtre du client, puis Ctrl+C sur le serveur.
+
+## Ça ne marche pas ?
+
+| Problème | Solution |
+| --- | --- |
+| `toto is not in the sudoers file` | Refaire l'étape 4, sans oublier de se déconnecter puis se reconnecter |
+| PowerShell : `VBoxManage` introuvable | Vérifier l'étape 1 : `cd` dans le dossier de VirtualBox et `.\` devant `VBoxManage.exe` |
+| `could not connect to display` puis `Aborted` | Le client est lancé en root : taper `exit`, vérifier que l'invite est `toto@...$`, relancer |
+| Client : « Connexion impossible » | Serveur pas lancé (étape 7), mauvaise adresse dans `config.ini` (étape 8), ou VM pas en « Réseau NAT » (étape 2) |
+| Les deux VM ont l'adresse `10.0.2.15` | Elles sont en « NAT » simple : refaire l'étape 2 |
+| `bash install.sh` affiche « Usage : ... » | Retaper exactement `bash install.sh serveur` ou `bash install.sh client` |
+| Serveur : « impossible d'écouter » | Un ancien serveur tourne encore : `pkill -f serveur.py`, puis relancer |
+| Erreur Qt « xcb » alors que l'invite est bien `toto@...$` | Relancer `bash install.sh client`, puis `QT_QPA_PLATFORM=xcb ./venv/bin/python client.py` |
+
+## Vérification de fonctionnement
+
+À faire une fois le client connecté. Noter le résultat dans la colonne « Observé ».
+
+| N° | Machine | Action | Résultat attendu | Observé |
 | --- | --- | --- | --- | --- |
-| 1 | VM 1 | `hostname -I` | Une adresse IP s'affiche, à noter | OK : 10.0.2.3 (client : 10.0.2.4) |
-| 2 | VM 1 et 2 | `sudo apt-get install -y git`, `git clone <url> les_fibreux_quartier` puis `cd les_fibreux_quartier` | Le dossier contient `serveur.py`, `client.py`, `config.ini`, `install.sh` | OK sur les deux VM, après avoir donné les droits sudo (voir écart A) |
-| 3 | VM 1 | `bash install.sh serveur` | Message « Installation terminée pour le rôle : serveur » | OK |
-| 4 | VM 2 | `bash install.sh client` | Message « Installation terminée pour le rôle : client » | 1er essai : message « Usage : ... » (argument mal tapé). 2e essai : OK |
-| 5 | VM 1 | `python3 serveur.py` | « en écoute sur 0.0.0.0:5050 » | OK |
-| 6 | VM 2 | Mettre l'adresse de la VM 1 dans `hote_client` de `config.ini` | Fichier enregistré | KO au 1er essai : fichier non modifié ou non enregistré, le client visait 127.0.0.1 (écart C). OK après correction |
-| 7 | VM 2 | `./venv/bin/python client.py` | Fenêtre plein écran, statut « Connecté à ... », voitures qui roulent | 1er essai : fenêtre affichée mais « Connexion impossible : [Errno 111] Connection refused ». OK après l'étape 6 corrigée |
-| 8 | VM 1 | Lire la console du serveur | « client connecté » avec l'adresse de la VM 2 | OK |
-| 9 | VM 2 | Départ E3, arrivée E4, « Lancer l'ambulance » | Ambulance qui roule par la route directe, tracé bleu, bandeau rouge | OK |
-| 10 | VM 2 | Cliquer deux fois sur la route Q3-Q4 (bloquée), relancer une ambulance E3 vers E4 | Le tracé passe par le contournement bas | OK |
-| 11 | VM 2 | Décocher « Avec priorité », relancer E3 vers E4 | Trajet plus long ; les deux durées apparaissent dans les statistiques | OK |
-| 11b | VM 2 | Laisser la route Q3-Q4 bloquée et observer les voitures arrivant de E3 ou E4 | Elles prennent le contournement bas au lieu d'attendre ; recliquer pour rendre la route fluide | OK |
-| 11c | VM 2 | Lancer une ambulance, puis cliquer « Arrêter l'urgence » | L'ambulance disparaît, le bandeau rouge aussi, les feux reprennent leur cycle | OK |
-| 12 | VM 1 et 2 | Ctrl+C sur le serveur ; le client affiche « Connexion perdue ». Relancer le serveur, fermer puis relancer le client | Redémarrage propre, le client se reconnecte | OK |
-| 13 | VM 2 | `python3 -m tests.test_simulation` puis `python3 -m tests.test_reseau` (depuis le dossier) | Les tests se terminent sans erreur | OK |
-| 14 | VM 1 | `python3 -c "import sqlite3; print(*sqlite3.connect('stats.db').execute('select * from trajet_ambulance'), sep=chr(10))"` | Les trajets d'ambulance sont listés | OK |
+| 1 | VM 1 | Lire le terminal du serveur | « client connecté » avec l'adresse de la VM 2 | |
+| 2 | VM 2 | Départ E3, arrivée E4, bouton rouge « Lancer l'ambulance » | L'ambulance roule, tracé bleu, bandeau « Il faut se serrer à droite ! » | |
+| 3 | VM 2 | Cliquer deux fois sur la route Q3-Q4 (bloquée), relancer une ambulance E3 → E4 | Le tracé passe par le contournement bas | |
+| 4 | VM 2 | Laisser Q3-Q4 bloquée, observer les voitures | Elles prennent le contournement au lieu d'attendre | |
+| 5 | VM 2 | Décocher « Avec priorité », relancer E3 → E4 | Trajet plus long ; les deux durées apparaissent dans les statistiques | |
+| 6 | VM 2 | Lancer une ambulance, puis « Arrêter l'urgence » | L'ambulance et le bandeau disparaissent, les feux reprennent leur cycle | |
+| 7 | VM 1 et 2 | Ctrl+C sur le serveur, puis le relancer ; fermer et relancer le client | Le client affiche « Connexion perdue », puis se reconnecte | |
+| 8 | VM 2 | `python3 -m tests` depuis le dossier du projet | « Tous les tests sont passés » | |
+| 9 | VM 1 | `python3 -m outils.trajets` | Les trajets d'ambulance s'affichent, avec la moyenne avec et sans priorité | |
 
-Depuis la version 1.1, la ligne 14 peut aussi se faire avec `python3 -m outils.trajets`, qui affiche les
-trajets sous forme de tableau avec la moyenne avec et sans priorité.
+## Historique des passes
 
-Problèmes fréquents : le client affiche « Connexion impossible » (mauvaise adresse, port 5050 bloqué par un
-pare-feu) ; erreur Qt « xcb » au lancement du client (relancer `bash install.sh client`).
-Redéploiement à zéro : supprimer le dossier, refaire les étapes 2 à 8.
+### Passe 1 : 21/10/2026, PC de l'IUT (Jordan HO)
+
+Images Debian 12 de l'IUT, VirtualBox sans droits administrateur. Cinq écarts trouvés et corrigés :
+
+| | Écart | Correction |
+| --- | --- | --- |
+| A | `sudo` refusé : « toto is not in the sudoers file » | `su -`, `usermod -aG sudo toto`, déconnexion et reconnexion (étape 4) |
+| B | Menu de création du réseau NAT introuvable ; en « NAT » simple, les VM ne se voient pas | Réseau créé avec `VBoxManage natnetwork add` (étape 1), mode « Réseau NAT » (étape 2) |
+| C | Client : « Connexion impossible », il visait `127.0.0.1` | `hote_client` modifié et enregistré dans `config.ini` (étape 8) |
+| D | `bash install.sh client` affiche « Usage : ... » | Argument retapé exactement |
+| E | Une image « Serveur Debian 12 » ne démarrait pas | Remplacée par une autre image Debian 12 de l'IUT |
+
+### Passe 2 : 21/10/2026, même PC, depuis l'instantané « vierge » (Jordan HO)
+
+Déploiement en suivant uniquement le README : **toutes les vérifications conformes, sans écart**, en
+15 minutes au maximum (du `git clone` au client « Connecté à ... »).
+
+### Passe 3 : 25/11/2026, PC de l'IUT (Younès BACH)
+
+Déploiement en suivant les étapes ci-dessus. Un nouvel écart trouvé :
+
+| | Écart | Correction |
+| --- | --- | --- |
+| F | Client : `qt.qpa.xcb: could not connect to display`, puis `Aborted` | Le client était lancé en root (resté connecté après `su -`) : `exit`, puis installation et lancement en utilisateur normal. Avertissement ajouté à l'étape 4 et dans « Ça ne marche pas ? » |

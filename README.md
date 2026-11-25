@@ -18,7 +18,7 @@ est recalculé si une route se bloque.
 3. [Comment ça marche](#comment-ça-marche)
 4. [Architecture](#architecture)
 5. [Protocole](#protocole)
-6. [Installation sur deux machines](#installation-environ-10-minutes-par-machine-ubuntu-2204-ou-debian-12)
+6. [Installation sur deux machines](#installation-sur-deux-machines)
 7. [Configuration réseau](#configuration-réseau)
 8. [Lancement](#lancement)
 9. [Utilisation du client](#utilisation-du-client)
@@ -67,7 +67,7 @@ python3 serveur.py                 # terminal 1 : le serveur, à laisser tourner
 > vient du serveur.
 
 Sous WSL, la fenêtre s'affiche grâce à WSLg (Windows 11 ou Windows 10 à jour). Pour le déploiement réel sur deux
-machines, voir [Installation sur deux machines](#installation-environ-10-minutes-par-machine-ubuntu-2204-ou-debian-12).
+machines, voir [Installation sur deux machines](#installation-sur-deux-machines).
 
 ## Comment ça marche
 
@@ -180,56 +180,84 @@ pour Q1 à Q4), `routes` (état et nombre de véhicules par sens), `ambulances` 
 `serrer`, `compteurs` et `stats`. Une ligne illisible ou une commande invalide reçoit un message `erreur`, sans
 couper la connexion.
 
-## Installation (environ 10 minutes par machine, Ubuntu 22.04 ou Debian 12)
+## Installation sur deux machines
 
-Sur chaque machine, l'utilisateur doit pouvoir utiliser `sudo`. Si `sudo true` répond « n'est pas dans le
-fichier sudoers » (cas fréquent sur Debian), le corriger une fois avec le mot de passe root, puis se déconnecter
-et se reconnecter :
+Il faut deux VM Debian 12 (ou Ubuntu 22.04) dans VirtualBox : **VM 1 = serveur**, **VM 2 = client** (avec
+bureau graphique). Compter environ **15 minutes**. Remplacez `toto` par votre utilisateur et `10.0.2.4` par
+l'adresse de votre VM 1.
 
-```bash
-su -c "/usr/sbin/usermod -aG sudo $USER"
+**1. Créer le réseau des VM** : sur le PC Windows, dans PowerShell.
+
+```powershell
+cd "C:\Program Files\Oracle\VirtualBox"
+.\VBoxManage.exe natnetwork add --netname NatNetwork --network 10.0.2.0/24 --enable --dhcp on
 ```
 
-Puis, sur chaque machine :
+**2. Régler les deux VM** : VM éteintes, dans Configuration de chaque VM.
+
+- **Réseau** : Réseau NAT, nom `NatNetwork` (pas « NAT » tout court).
+- **Affichage** : mémoire vidéo 128 Mo, accélération 3D cochée, pour un affichage plus fluide.
+
+**3. Démarrer les deux VM**, puis donner les droits sudo sur chacune (une seule fois) :
 
 ```bash
-sudo apt-get update && sudo apt-get install -y git
-git clone https://github.com/JORDAN6ho/les_fibreux_quartier.git les_fibreux_quartier
+su -
+usermod -aG sudo toto
+exit
+```
+
+Se déconnecter puis se reconnecter. Ensuite, toujours travailler en `toto@...$`, **jamais en root**.
+
+**4. VM 1 (serveur)**
+
+```bash
+hostname -I                                   # noter l'adresse, ex. 10.0.2.4
+sudo apt update && sudo apt install git -y
+git clone https://github.com/JORDAN6ho/les_fibreux_quartier.git
 cd les_fibreux_quartier
-bash install.sh serveur     # sur la VM 1
-bash install.sh client      # sur la VM 2 (installe aussi les bibliothèques graphiques de Qt)
+bash install.sh serveur
 ```
 
-Le dernier argument de `git clone` fixe le nom du dossier : `cd les_fibreux_quartier` fonctionne quel que soit
-le nom du dépôt. `serveur.py`, `client.py` et `install.sh` sont à la racine du dépôt (pas de second dossier
-`les_fibreux_quartier` à l'intérieur).
+**5. VM 2 (client)**
 
-`bash install.sh` fonctionne même si le fichier a perdu son droit d'exécution (dépôt poussé depuis Windows).
+```bash
+hostname -I                                   # doit être différente de la VM 1
+sudo apt update && sudo apt install git -y
+git clone https://github.com/JORDAN6ho/les_fibreux_quartier.git
+cd les_fibreux_quartier
+bash install.sh client
+```
 
-Le script installe les paquets système, crée l'environnement virtuel (`venv`) et, pour le client, installe
-`requirements.txt` (versions exactes : PyQt6 6.7.1, PyQt6-Qt6 6.7.3, PyQt6-sip 13.13.0). Python 3.10 ou plus
-est requis.
+Chaque installation se termine par `Installation terminée pour le rôle : ...`.
 
 ## Configuration réseau
 
-Aucune adresse n'est écrite dans le code. Ordre de priorité : arguments, `config.ini`, variables d'environnement
-(`CARREFOUR_HOTE`, `CARREFOUR_PORT`, utilisées seulement si `config.ini` ne donne pas la valeur).
+Sur la VM 2, mettre l'adresse de la VM 1 dans `config.ini` :
 
-1. Sur la VM 1, relever son adresse IP : `hostname -I`
-2. Sur la VM 2, ouvrir `config.ini` et mettre cette adresse dans `hote_client` (le port par défaut est 5050).
-3. Ou, sans modifier le fichier : `./venv/bin/python client.py --hote <adresse IP du serveur> --port 5050`.
+```bash
+nano config.ini
+```
 
-Le serveur écoute sur `hote_serveur` (`0.0.0.0` : toutes les interfaces). Le port TCP doit être joignable
-depuis la VM 2 (pare-feu éventuel : `sudo ufw allow 5050/tcp`).
+```ini
+hote_client = 10.0.2.4
+```
+
+Enregistrer : **Ctrl+O**, **Entrée**, **Ctrl+X**. Le port par défaut est 5050.
 
 ## Lancement
 
+**Toujours le serveur d'abord, puis le client.**
+
 ```bash
-python3 serveur.py                 # VM 1 (Ctrl+C pour arrêter)
-./venv/bin/python client.py        # VM 2
+python3 serveur.py                  # VM 1 : laisser le terminal ouvert (Ctrl+C pour arrêter)
+./venv/bin/python client.py         # VM 2 : en utilisateur normal, pas en root
 ```
 
-Sur la VM 1, après `bash install.sh serveur`, `python3` suffit : le serveur n'utilise que la bibliothèque standard.
+La fenêtre s'ouvre avec le statut « Connecté à 10.0.2.4:5050 ». Sans modifier `config.ini`, on peut aussi lancer
+`./venv/bin/python client.py --hote 10.0.2.4`.
+
+Le détail de chaque étape, les vérifications et les problèmes fréquents sont dans
+[`AUTO_RECETTE.md`](AUTO_RECETTE.md).
 
 ## Utilisation du client
 

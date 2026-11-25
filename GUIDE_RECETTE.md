@@ -83,7 +83,7 @@ Points à surveiller et à noter :
 | Temps | Où | Ce qu'on fait (section du README) | Ligne |
 | --- | --- | --- | --- |
 | ~0:10 | VM 1 | *Lancement* : `python3 serveur.py` | 5 |
-| ~0:11 | VM 2 | *Configuration réseau* : `nano config.ini`, mettre l'adresse de la VM 1 dans `hote_client`, enregistrer (Ctrl+O, Entrée, Ctrl+X) | 6 |
+| ~0:11 | VM 2 | *Configuration réseau* : `nano config.ini`, mettre l'adresse de la VM 1 dans `hote_client`, enregistrer le fichier et quitter l'éditeur | 6 |
 | ~0:12 | VM 2 | `./venv/bin/python client.py`, **dans un terminal du bureau graphique** (pas en SSH) | 7 |
 | ~0:12 | VM 1 | Lire la console du serveur | 8 |
 

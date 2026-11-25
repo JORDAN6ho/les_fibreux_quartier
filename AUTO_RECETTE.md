@@ -4,10 +4,22 @@
 
 - **VM 1 = serveur** : elle simule le quartier.
 - **VM 2 = client** : elle affiche la carte (bureau graphique obligatoire).
-- **Matériel** : un PC Windows avec Oracle VirtualBox et deux VM Debian 12 (ou Ubuntu 22.04).
+- **Matériel** : un PC Windows de l'IUT avec Oracle VirtualBox, et deux VM créées à partir de l'image
+  **Debian 12 du Disque Commun** de l'IUT, rangées dans **`C:\Temp`**.
 
 > Dans les commandes, `toto` est le nom de l'utilisateur de la VM et `10.0.2.4` l'adresse de la VM 1 :
 > remplacez-les par les vôtres.
+
+## Étape 0 : importer les deux VM (VirtualBox)
+
+Ne pas installer Debian soi-même : prendre l'image **Debian 12 du Disque Commun**.
+
+1. Dans VirtualBox : **Fichier → Importer un appareil virtuel**, puis choisir l'image Debian 12 du Disque Commun.
+2. Dans les réglages de l'import :
+   - **Nom** : `Serveur_lesFibreux` ;
+   - **Dossier de base des machines** : **`C:\Temp`** ;
+   - **Politique d'adresse MAC** : générer de nouvelles adresses MAC pour toutes les cartes réseau.
+3. Refaire la même chose pour la deuxième VM, avec le nom `Client_lesFibreux`, toujours dans `C:\Temp`.
 
 ## Étape 1 : créer le réseau des deux VM (PC Windows)
 
@@ -52,10 +64,21 @@ usermod -aG sudo toto
 exit
 ```
 
-Puis **se déconnecter et se reconnecter** (menu en haut à droite → Se déconnecter).
+Les droits sudo ne sont pris en compte qu'après une nouvelle connexion de `toto` :
+
+- **Méthode normale : redémarrer la VM.**
+- **Plus rapide, sans redémarrer :** taper `su - toto` (mot de passe de `toto`). Ce terminal a tout de suite les
+  droits sudo : faire la suite de l'installation dedans.
+
+```bash
+su - toto
+```
 
 > **Vérifier :** l'invite du terminal doit afficher `toto@...$` et pas `root@...#`.
 > Toutes les étapes suivantes se font en `toto`, **jamais en root**.
+>
+> **Sur la VM 2 avec `su - toto` :** ce terminal sert à installer, mais il n'a pas accès à l'affichage. Pour
+> lancer le client (étape 9), ouvrir **un nouveau terminal** depuis le bureau.
 
 ## Étape 5 : installer le serveur (VM 1)
 
@@ -63,7 +86,7 @@ Puis **se déconnecter et se reconnecter** (menu en haut à droite → Se décon
 hostname -I
 ```
 
-➡️ Noter l'adresse affichée (exemple : `10.0.2.4`). C'est l'adresse du serveur.
+**À noter :** l'adresse affichée (exemple : `10.0.2.4`). C'est l'adresse du serveur.
 
 ```bash
 sudo apt update && sudo apt install git -y
@@ -72,7 +95,7 @@ cd les_fibreux_quartier
 bash install.sh serveur
 ```
 
-✅ Le dernier message doit être : `Installation terminée pour le rôle : serveur`.
+**Vérifier :** le dernier message doit être : `Installation terminée pour le rôle : serveur`.
 
 ## Étape 6 : installer le client (VM 2)
 
@@ -80,7 +103,7 @@ bash install.sh serveur
 hostname -I
 ```
 
-✅ L'adresse doit être **différente** de celle de la VM 1. Si les deux VM ont `10.0.2.15`, refaire l'étape 2.
+**Vérifier :** l'adresse doit être **différente** de celle de la VM 1. Si les deux VM ont `10.0.2.15`, refaire l'étape 2.
 
 ```bash
 sudo apt update && sudo apt install git -y
@@ -89,43 +112,50 @@ cd les_fibreux_quartier
 bash install.sh client
 ```
 
-✅ Le dernier message doit être : `Installation terminée pour le rôle : client`.
+**Vérifier :** le dernier message doit être : `Installation terminée pour le rôle : client`.
 
 ## Étape 7 : lancer le serveur (VM 1)
 
+⚠️ **Ouvrir absolument un nouveau terminal pour lancer le serveur, pour être sûr d'être un utilisateur simple :
+l'invite doit être `toto@...$`, et pas `root@...#`.**
+
 ```bash
+cd les_fibreux_quartier
 python3 serveur.py
 ```
 
-✅ Le serveur affiche qu'il est en écoute sur `0.0.0.0:5050`.
+**Vérifier :** le serveur affiche qu'il est en écoute sur `0.0.0.0:5050`.
 
-⚠️ **Laisser ce terminal ouvert** : fermer le terminal arrête le serveur.
+**Attention : laisser ce terminal ouvert** : fermer le terminal arrête le serveur.
 
-## Étape 8 : donner l'adresse du serveur au client (VM 2)
+## Étape 8 : revérifier l'adresse du serveur (VM 1)
 
-Depuis le dossier `les_fibreux_quartier` :
+Sur la **VM 1**, retaper :
 
 ```bash
-nano config.ini
+hostname -I
 ```
 
-Remplacer la ligne `hote_client = 127.0.0.1` par l'adresse notée à l'étape 5 :
-
-```ini
-hote_client = 10.0.2.4
-```
-
-Enregistrer et quitter : **Ctrl+O**, **Entrée**, **Ctrl+X**.
+C'est cette adresse (exemple : `10.0.2.4`) qu'il faut donner au client à l'étape 9, même si elle a déjà été
+notée à l'étape 5.
 
 ## Étape 9 : lancer le client (VM 2, en toto)
 
+⚠️ **Ouvrir absolument un nouveau terminal pour lancer le client, pour être sûr d'être un utilisateur simple :
+l'invite doit être `toto@...$`, et pas `root@...#`.**
+
+**Lancer le client uniquement avec cette commande, avec `--hote` suivi de l'adresse de la VM 1 obtenue par
+`hostname -I` à l'étape 8 :**
+
 ```bash
-./venv/bin/python client.py
+cd les_fibreux_quartier
+./venv/bin/python client.py --hote 10.0.2.4
 ```
 
-✅ La fenêtre du quartier s'ouvre, le statut indique « Connecté à 10.0.2.4:5050 » et les voitures roulent.
+Remplacer `10.0.2.4` par l'adresse de votre VM 1. Sans `--hote`, le client vise `127.0.0.1` (la VM 2
+elle-même) et affiche « Connexion impossible ».
 
-Autre possibilité, sans modifier `config.ini` : `./venv/bin/python client.py --hote 10.0.2.4`
+**Vérifier :** la fenêtre du quartier s'ouvre, le statut indique « Connecté à 10.0.2.4:5050 » et les voitures roulent.
 
 **C'est lancé !** Pour arrêter : fermer la fenêtre du client, puis Ctrl+C sur le serveur.
 
@@ -133,11 +163,12 @@ Autre possibilité, sans modifier `config.ini` : `./venv/bin/python client.py --
 
 | Problème | Solution |
 | --- | --- |
-| `toto is not in the sudoers file` | Refaire l'étape 4, sans oublier de se déconnecter puis se reconnecter |
+| `toto is not in the sudoers file` | Refaire l'étape 4, sans oublier de redémarrer la VM ou de taper `su - toto` |
 | PowerShell : `VBoxManage` introuvable | Vérifier l'étape 1 : `cd` dans le dossier de VirtualBox et `.\` devant `VBoxManage.exe` |
-| `could not connect to display` puis `Aborted` | Le client est lancé en root : taper `exit`, vérifier que l'invite est `toto@...$`, relancer |
-| Client : « Connexion impossible » | Serveur pas lancé (étape 7), mauvaise adresse dans `config.ini` (étape 8), ou VM pas en « Réseau NAT » (étape 2) |
+| `could not connect to display` puis `Aborted` | Le client est lancé en root, ou dans le terminal du `su - toto` : ouvrir un nouveau terminal depuis le bureau, vérifier que l'invite est `toto@...$`, relancer |
+| Client : « Connexion impossible » | Serveur pas lancé (étape 7), client lancé sans `--hote` ou avec une mauvaise adresse (étapes 8 et 9), ou VM pas en « Réseau NAT » (étape 2) |
 | Les deux VM ont l'adresse `10.0.2.15` | Elles sont en « NAT » simple : refaire l'étape 2 |
+| Les deux VM ont la même adresse, mais pas `10.0.2.15` | Même adresse MAC (la même image importée deux fois) : réimporter la VM 2 en générant de nouvelles adresses MAC (étape 0) |
 | `bash install.sh` affiche « Usage : ... » | Retaper exactement `bash install.sh serveur` ou `bash install.sh client` |
 | Serveur : « impossible d'écouter » | Un ancien serveur tourne encore : `pkill -f serveur.py`, puis relancer |
 | Erreur Qt « xcb » alors que l'invite est bien `toto@...$` | Relancer `bash install.sh client`, puis `QT_QPA_PLATFORM=xcb ./venv/bin/python client.py` |
@@ -162,15 +193,15 @@ Autre possibilité, sans modifier `config.ini` : `./venv/bin/python client.py --
 
 ### Passe 1 : 21/10/2026, PC de l'IUT (Jordan HO)
 
-Images Debian 12 de l'IUT, VirtualBox sans droits administrateur. Cinq écarts trouvés et corrigés :
+Images Debian 12 du Disque Commun de l'IUT, VM rangées dans `C:\Temp`, VirtualBox sans droits administrateur. Cinq écarts trouvés et corrigés :
 
 | | Écart | Correction |
 | --- | --- | --- |
-| A | `sudo` refusé : « toto is not in the sudoers file » | `su -`, `usermod -aG sudo toto`, déconnexion et reconnexion (étape 4) |
+| A | `sudo` refusé : « toto is not in the sudoers file » | `su -`, `usermod -aG sudo toto`, puis redémarrage de la VM ou `su - toto` (étape 4) |
 | B | Menu de création du réseau NAT introuvable ; en « NAT » simple, les VM ne se voient pas | Réseau créé avec `VBoxManage natnetwork add` (étape 1), mode « Réseau NAT » (étape 2) |
-| C | Client : « Connexion impossible », il visait `127.0.0.1` | `hote_client` modifié et enregistré dans `config.ini` (étape 8) |
+| C | Client : « Connexion impossible », il visait `127.0.0.1` | Adresse de la VM 1 donnée au client (aujourd'hui avec `--hote`, étapes 8 et 9) |
 | D | `bash install.sh client` affiche « Usage : ... » | Argument retapé exactement |
-| E | Une image « Serveur Debian 12 » ne démarrait pas | Remplacée par une autre image Debian 12 de l'IUT |
+| E | Une image « Serveur Debian 12 » ne démarrait pas | Remplacée par l'image Debian 12 du Disque Commun |
 
 ### Passe 2 : 21/10/2026, même PC, depuis l'instantané « vierge » (Jordan HO)
 

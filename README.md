@@ -182,9 +182,12 @@ couper la connexion.
 
 ## Installation sur deux machines
 
-Il faut deux VM Debian 12 (ou Ubuntu 22.04) dans VirtualBox : **VM 1 = serveur**, **VM 2 = client** (avec
-bureau graphique). Compter environ **15 minutes**. Remplacez `toto` par votre utilisateur et `10.0.2.4` par
-l'adresse de votre VM 1.
+Il faut deux VM dans VirtualBox : **VM 1 = serveur**, **VM 2 = client** (avec bureau graphique). Compter
+environ **15 minutes**. Remplacez `toto` par votre utilisateur et `10.0.2.4` par l'adresse de votre VM 1.
+
+**0. Importer les deux VM** à partir de l'image **Debian 12 du Disque Commun** de l'IUT : dans VirtualBox,
+**Fichier → Importer un appareil virtuel**, dossier de base des machines **`C:\Temp`**, et nouvelles adresses
+MAC. Une fois pour `Serveur_lesFibreux`, une fois pour `Client_lesFibreux`.
 
 **1. Créer le réseau des VM** : sur le PC Windows, dans PowerShell.
 
@@ -206,7 +209,9 @@ usermod -aG sudo toto
 exit
 ```
 
-Se déconnecter puis se reconnecter. Ensuite, toujours travailler en `toto@...$`, **jamais en root**.
+Puis **redémarrer la VM** pour que les droits sudo comptent, ou, plus rapide, taper `su - toto` et continuer
+dans ce terminal (sur la VM 2, lancer ensuite le client dans un nouveau terminal ouvert depuis le bureau).
+Ensuite, toujours travailler en `toto@...$`, **jamais en root**.
 
 **4. VM 1 (serveur)**
 
@@ -232,29 +237,32 @@ Chaque installation se termine par `Installation terminée pour le rôle : ...`.
 
 ## Configuration réseau
 
-Sur la VM 2, mettre l'adresse de la VM 1 dans `config.ini` :
+Le client reçoit l'adresse du serveur avec l'option `--hote`. Juste avant de lancer le client, **revérifier
+l'adresse de la VM 1** :
 
 ```bash
-nano config.ini
+hostname -I                         # sur la VM 1, ex. 10.0.2.4
 ```
 
-```ini
-hote_client = 10.0.2.4
-```
-
-Enregistrer : **Ctrl+O**, **Entrée**, **Ctrl+X**. Le port par défaut est 5050.
+Le port par défaut est 5050. L'option `--hote` passe avant `config.ini` : il n'y a pas besoin de modifier ce
+fichier.
 
 ## Lancement
 
 **Toujours le serveur d'abord, puis le client.**
 
+⚠️ **Sur les deux VM, ouvrir absolument un nouveau terminal pour lancer le serveur et le client, pour être sûr
+d'être un utilisateur simple : l'invite doit être `toto@...$`, et pas `root@...#`.**
+
 ```bash
-python3 serveur.py                  # VM 1 : laisser le terminal ouvert (Ctrl+C pour arrêter)
-./venv/bin/python client.py         # VM 2 : en utilisateur normal, pas en root
+cd les_fibreux_quartier
+python3 serveur.py                             # VM 1 : laisser le terminal ouvert (Ctrl+C pour arrêter)
+./venv/bin/python client.py --hote 10.0.2.4    # VM 2 : avec l'adresse de la VM 1 (hostname -I)
 ```
 
-La fenêtre s'ouvre avec le statut « Connecté à 10.0.2.4:5050 ». Sans modifier `config.ini`, on peut aussi lancer
-`./venv/bin/python client.py --hote 10.0.2.4`.
+**Lancer le client uniquement avec `--hote` suivi de l'adresse de la VM 1.** Sans `--hote`, il vise
+`127.0.0.1` (la VM 2 elle-même) et affiche « Connexion impossible ». La fenêtre s'ouvre avec le statut
+« Connecté à 10.0.2.4:5050 ».
 
 Le détail de chaque étape, les vérifications et les problèmes fréquents sont dans
 [`AUTO_RECETTE.md`](AUTO_RECETTE.md).
@@ -320,8 +328,8 @@ push (onglet *Actions*, fichier `.github/workflows/tests.yml`).
 
 | Symptôme | Solution |
 | --- | --- |
-| `... n'est pas dans le fichier sudoers` | `su -c "/usr/sbin/usermod -aG sudo $USER"`, puis se déconnecter et se reconnecter |
-| Client : « Connexion impossible » | Vérifier `hote_client` dans `config.ini`, puis `ping <adresse VM 1>` ; sous VirtualBox, mettre les deux VM en « Réseau NAT » commun |
+| `... n'est pas dans le fichier sudoers` | `su -`, `usermod -aG sudo toto`, `exit`, puis redémarrer la VM ou taper `su - toto` |
+| Client : « Connexion impossible » | Vérifier que le client est lancé avec `--hote` et la bonne adresse (`hostname -I` sur la VM 1), puis `ping <adresse VM 1>` ; sous VirtualBox, mettre les deux VM en « Réseau NAT » commun |
 | Serveur : « impossible d'écouter » | Un ancien serveur tourne encore : `pkill -f serveur.py`, puis relancer |
 | Serveur : « port invalide » | Corriger `port` dans `config.ini` (nombre entre 1 et 65535) |
 | Client : erreur Qt « xcb » | Relancer `bash install.sh client`, ou essayer `QT_QPA_PLATFORM=xcb ./venv/bin/python client.py` |

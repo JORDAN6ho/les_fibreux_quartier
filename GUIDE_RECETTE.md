@@ -22,11 +22,14 @@ faire en dehors du README est un écart : on le note, puis on corrige le README.
 
 | | VM 1 : serveur | VM 2 : client |
 | --- | --- | --- |
-| Système | Ubuntu 22.04 ou Debian 12 (le bureau n'est pas obligatoire) | Ubuntu 22.04 ou Debian 12 **avec bureau graphique** |
+| Système | Image **Debian 12 du Disque Commun** de l'IUT | Image **Debian 12 du Disque Commun** de l'IUT (**avec bureau graphique**) |
+| Emplacement | `C:\Temp` (nom `Serveur_lesFibreux`) | `C:\Temp` (nom `Client_lesFibreux`) |
 | Mémoire | 2 Go | 4 Go |
 | Disque | 15 Go | 25 Go |
 
-1. Installer le système sur les deux VM, sans rien ajouter d'autre (pas de git, pas de Python en plus).
+1. Ne pas installer Debian soi-même : importer l'image **Debian 12 du Disque Commun** dans VirtualBox
+   (*Fichier > Importer un appareil virtuel*), avec **`C:\Temp`** comme dossier de base des machines et de
+   nouvelles adresses MAC, une fois pour chaque VM. Ne rien ajouter d'autre (pas de git, pas de Python en plus).
 2. **Réseau : les deux VM doivent se voir.** Dans VirtualBox, le mode « NAT » par défaut ne marche pas (les deux
    VM ont la même adresse 10.0.2.15 et ne se voient pas). Choisir, pour les deux VM :
    - « Réseau NAT » (même réseau NAT pour les deux, créé dans *Fichier > Outils > Gestionnaire de réseau*), ou
@@ -34,7 +37,8 @@ faire en dehors du README est un écart : on le note, puis on corrige le README.
    Avec VMware : « NAT » ou « Bridged » sur les deux, c'est bon dans les deux cas.
 3. Vérifier que l'utilisateur peut faire `sudo` : `sudo true` ne doit pas répondre « n'est pas dans le fichier
    sudoers ». Sur Debian 12, si un mot de passe root a été donné à l'installation, l'utilisateur n'a pas `sudo` :
-   `su -`, puis `usermod -aG sudo <utilisateur>`, puis se déconnecter et se reconnecter.
+   `su -`, puis `usermod -aG sudo <utilisateur>`, `exit`, puis redémarrer la VM (ou, plus rapide,
+   `su - <utilisateur>` dans le terminal).
 4. Vérifier qu'Internet marche dans chaque VM (`ping -c 2 deb.debian.org`).
 5. Sur Ubuntu, au premier démarrage, les mises à jour automatiques bloquent `apt` pendant quelques minutes
    (« Could not get lock »). Attendre qu'elles finissent avant de lancer le chrono.
@@ -50,7 +54,7 @@ Ouvrir `AUTO_RECETTE.md` (sur votre PC, pas dans les VM). Pour chaque ligne, la 
   `KO 14:07 : « bash: git: command not found », installé à la main avec apt` ;
 - `Non fait` avec la raison si l'étape n'a pas pu être jouée.
 
-Noter l'heure de départ en haut du fichier : `Recette du jj/mm, début hh:mm, VM Ubuntu 22.04 / Debian 12`.
+Noter l'heure de départ en haut du fichier : `Recette du jj/mm, début hh:mm, VM Debian 12 du Disque Commun`.
 
 ---
 
@@ -79,13 +83,13 @@ Points à surveiller et à noter :
 | Temps | Où | Ce qu'on fait (section du README) | Ligne |
 | --- | --- | --- | --- |
 | ~0:10 | VM 1 | *Lancement* : `python3 serveur.py` | 5 |
-| ~0:11 | VM 2 | *Configuration réseau* : `nano config.ini`, mettre l'adresse de la VM 1 dans `hote_client`, enregistrer (Ctrl+O, Entrée, Ctrl+X) | 6 |
-| ~0:12 | VM 2 | `./venv/bin/python client.py`, **dans un terminal du bureau graphique** (pas en SSH) | 7 |
+| ~0:11 | VM 1 | *Configuration réseau* : revérifier l'adresse avec `hostname -I` | 6 |
+| ~0:12 | VM 2 | `./venv/bin/python client.py --hote <adresse VM 1>`, **dans un nouveau terminal du bureau graphique** (pas en SSH, pas en root) | 7 |
 | ~0:12 | VM 1 | Lire la console du serveur | 8 |
 
-- Si le client affiche « Connexion impossible » : vérifier l'adresse dans `config.ini`, puis depuis la VM 2
+- Si le client affiche « Connexion impossible » : vérifier l'adresse donnée après `--hote`, puis depuis la VM 2
   `ping <adresse VM 1>`. Si le ping échoue, c'est le réseau des VM (voir 0.2), pas le programme. Si le ping
-  passe mais pas la connexion, essayer `sudo ufw allow 5050/tcp` sur la VM 1 (comme dans le README).
+  passe mais pas la connexion, essayer `sudo ufw allow 5050/tcp` sur la VM 1.
 - Si le client s'arrête avec une erreur Qt (« xcb » ou « wayland ») : relancer `bash install.sh client`, puis
   essayer `QT_QPA_PLATFORM=xcb ./venv/bin/python client.py`. Noter le message exact : c'est un écart à corriger
   dans le README si la deuxième commande a été nécessaire.

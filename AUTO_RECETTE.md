@@ -128,44 +128,34 @@ python3 serveur.py
 
 **Attention : laisser ce terminal ouvert** : fermer le terminal arrête le serveur.
 
-## Étape 8 : donner l'adresse du serveur au client (VM 2)
+## Étape 8 : revérifier l'adresse du serveur (VM 1)
 
-D'abord, **revérifier l'adresse du serveur** : sur la **VM 1**, retaper
+Sur la **VM 1**, retaper :
 
 ```bash
 hostname -I
 ```
 
-C'est cette adresse (exemple : `10.0.2.4`) qu'il faut donner au client, même si elle a déjà été notée à
-l'étape 5.
-
-Puis sur la **VM 2**, depuis le dossier `les_fibreux_quartier` :
-
-```bash
-nano config.ini
-```
-
-Remplacer la ligne `hote_client = 127.0.0.1` par l'adresse de la VM 1 :
-
-```ini
-hote_client = 10.0.2.4
-```
-
-Enregistrer le fichier et quitter l'éditeur.
+C'est cette adresse (exemple : `10.0.2.4`) qu'il faut donner au client à l'étape 9, même si elle a déjà été
+notée à l'étape 5.
 
 ## Étape 9 : lancer le client (VM 2, en toto)
 
 ⚠️ **Ouvrir absolument un nouveau terminal pour lancer le client, pour être sûr d'être un utilisateur simple :
 l'invite doit être `toto@...$`, et pas `root@...#`.**
 
+**Lancer le client uniquement avec cette commande, avec `--hote` suivi de l'adresse de la VM 1 obtenue par
+`hostname -I` à l'étape 8 :**
+
 ```bash
 cd les_fibreux_quartier
-./venv/bin/python client.py
+./venv/bin/python client.py --hote 10.0.2.4
 ```
 
-**Vérifier :** la fenêtre du quartier s'ouvre, le statut indique « Connecté à 10.0.2.4:5050 » et les voitures roulent.
+Remplacer `10.0.2.4` par l'adresse de votre VM 1. Sans `--hote`, le client vise `127.0.0.1` (la VM 2
+elle-même) et affiche « Connexion impossible ».
 
-Autre possibilité, sans modifier `config.ini` : `./venv/bin/python client.py --hote 10.0.2.4`
+**Vérifier :** la fenêtre du quartier s'ouvre, le statut indique « Connecté à 10.0.2.4:5050 » et les voitures roulent.
 
 **C'est lancé !** Pour arrêter : fermer la fenêtre du client, puis Ctrl+C sur le serveur.
 
@@ -176,7 +166,7 @@ Autre possibilité, sans modifier `config.ini` : `./venv/bin/python client.py --
 | `toto is not in the sudoers file` | Refaire l'étape 4, sans oublier de redémarrer la VM ou de taper `su - toto` |
 | PowerShell : `VBoxManage` introuvable | Vérifier l'étape 1 : `cd` dans le dossier de VirtualBox et `.\` devant `VBoxManage.exe` |
 | `could not connect to display` puis `Aborted` | Le client est lancé en root, ou dans le terminal du `su - toto` : ouvrir un nouveau terminal depuis le bureau, vérifier que l'invite est `toto@...$`, relancer |
-| Client : « Connexion impossible » | Serveur pas lancé (étape 7), mauvaise adresse dans `config.ini` (étape 8), ou VM pas en « Réseau NAT » (étape 2) |
+| Client : « Connexion impossible » | Serveur pas lancé (étape 7), client lancé sans `--hote` ou avec une mauvaise adresse (étapes 8 et 9), ou VM pas en « Réseau NAT » (étape 2) |
 | Les deux VM ont l'adresse `10.0.2.15` | Elles sont en « NAT » simple : refaire l'étape 2 |
 | Les deux VM ont la même adresse, mais pas `10.0.2.15` | Même adresse MAC (la même image importée deux fois) : réimporter la VM 2 en générant de nouvelles adresses MAC (étape 0) |
 | `bash install.sh` affiche « Usage : ... » | Retaper exactement `bash install.sh serveur` ou `bash install.sh client` |
@@ -209,7 +199,7 @@ Images Debian 12 du Disque Commun de l'IUT, VM rangées dans `C:\Temp`, VirtualB
 | --- | --- | --- |
 | A | `sudo` refusé : « toto is not in the sudoers file » | `su -`, `usermod -aG sudo toto`, puis redémarrage de la VM ou `su - toto` (étape 4) |
 | B | Menu de création du réseau NAT introuvable ; en « NAT » simple, les VM ne se voient pas | Réseau créé avec `VBoxManage natnetwork add` (étape 1), mode « Réseau NAT » (étape 2) |
-| C | Client : « Connexion impossible », il visait `127.0.0.1` | `hote_client` modifié et enregistré dans `config.ini` (étape 8) |
+| C | Client : « Connexion impossible », il visait `127.0.0.1` | Adresse de la VM 1 donnée au client (aujourd'hui avec `--hote`, étapes 8 et 9) |
 | D | `bash install.sh client` affiche « Usage : ... » | Argument retapé exactement |
 | E | Une image « Serveur Debian 12 » ne démarrait pas | Remplacée par l'image Debian 12 du Disque Commun |
 

@@ -22,11 +22,14 @@ faire en dehors du README est un écart : on le note, puis on corrige le README.
 
 | | VM 1 : serveur | VM 2 : client |
 | --- | --- | --- |
-| Système | Ubuntu 22.04 ou Debian 12 (le bureau n'est pas obligatoire) | Ubuntu 22.04 ou Debian 12 **avec bureau graphique** |
+| Système | Image **Debian 12 du Disque Commun** de l'IUT | Image **Debian 12 du Disque Commun** de l'IUT (**avec bureau graphique**) |
+| Emplacement | `C:\Temp` (nom `Serveur_lesFibreux`) | `C:\Temp` (nom `Client_lesFibreux`) |
 | Mémoire | 2 Go | 4 Go |
 | Disque | 15 Go | 25 Go |
 
-1. Installer le système sur les deux VM, sans rien ajouter d'autre (pas de git, pas de Python en plus).
+1. Ne pas installer Debian soi-même : importer l'image **Debian 12 du Disque Commun** dans VirtualBox
+   (*Fichier > Importer un appareil virtuel*), avec **`C:\Temp`** comme dossier de base des machines et de
+   nouvelles adresses MAC, une fois pour chaque VM. Ne rien ajouter d'autre (pas de git, pas de Python en plus).
 2. **Réseau : les deux VM doivent se voir.** Dans VirtualBox, le mode « NAT » par défaut ne marche pas (les deux
    VM ont la même adresse 10.0.2.15 et ne se voient pas). Choisir, pour les deux VM :
    - « Réseau NAT » (même réseau NAT pour les deux, créé dans *Fichier > Outils > Gestionnaire de réseau*), ou
@@ -50,7 +53,7 @@ Ouvrir `AUTO_RECETTE.md` (sur votre PC, pas dans les VM). Pour chaque ligne, la 
   `KO 14:07 : « bash: git: command not found », installé à la main avec apt` ;
 - `Non fait` avec la raison si l'étape n'a pas pu être jouée.
 
-Noter l'heure de départ en haut du fichier : `Recette du jj/mm, début hh:mm, VM Ubuntu 22.04 / Debian 12`.
+Noter l'heure de départ en haut du fichier : `Recette du jj/mm, début hh:mm, VM Debian 12 du Disque Commun`.
 
 ---
 

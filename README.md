@@ -209,7 +209,9 @@ usermod -aG sudo toto
 exit
 ```
 
-Se déconnecter puis se reconnecter. Ensuite, toujours travailler en `toto@...$`, **jamais en root**.
+Puis **redémarrer la VM** pour que les droits sudo comptent, ou, plus rapide, taper `su - toto` et continuer
+dans ce terminal (sur la VM 2, lancer ensuite le client dans un nouveau terminal ouvert depuis le bureau).
+Ensuite, toujours travailler en `toto@...$`, **jamais en root**.
 
 **4. VM 1 (serveur)**
 
@@ -323,7 +325,7 @@ push (onglet *Actions*, fichier `.github/workflows/tests.yml`).
 
 | Symptôme | Solution |
 | --- | --- |
-| `... n'est pas dans le fichier sudoers` | `su -c "/usr/sbin/usermod -aG sudo $USER"`, puis se déconnecter et se reconnecter |
+| `... n'est pas dans le fichier sudoers` | `su -`, `usermod -aG sudo toto`, `exit`, puis redémarrer la VM ou taper `su - toto` |
 | Client : « Connexion impossible » | Vérifier `hote_client` dans `config.ini`, puis `ping <adresse VM 1>` ; sous VirtualBox, mettre les deux VM en « Réseau NAT » commun |
 | Serveur : « impossible d'écouter » | Un ancien serveur tourne encore : `pkill -f serveur.py`, puis relancer |
 | Serveur : « port invalide » | Corriger `port` dans `config.ini` (nombre entre 1 et 65535) |

@@ -182,9 +182,12 @@ couper la connexion.
 
 ## Installation sur deux machines
 
-Il faut deux VM Debian 12 (ou Ubuntu 22.04) dans VirtualBox : **VM 1 = serveur**, **VM 2 = client** (avec
-bureau graphique). Compter environ **15 minutes**. Remplacez `toto` par votre utilisateur et `10.0.2.4` par
-l'adresse de votre VM 1.
+Il faut deux VM dans VirtualBox : **VM 1 = serveur**, **VM 2 = client** (avec bureau graphique). Compter
+environ **15 minutes**. Remplacez `toto` par votre utilisateur et `10.0.2.4` par l'adresse de votre VM 1.
+
+**0. Importer les deux VM** à partir de l'image **Debian 12 du Disque Commun** de l'IUT : dans VirtualBox,
+**Fichier → Importer un appareil virtuel**, dossier de base des machines **`C:\Temp`**, et nouvelles adresses
+MAC. Une fois pour `Serveur_lesFibreux`, une fois pour `Client_lesFibreux`.
 
 **1. Créer le réseau des VM** : sur le PC Windows, dans PowerShell.
 

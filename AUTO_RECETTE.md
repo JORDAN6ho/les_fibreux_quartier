@@ -126,19 +126,28 @@ python3 serveur.py
 
 ## Étape 8 : donner l'adresse du serveur au client (VM 2)
 
-Depuis le dossier `les_fibreux_quartier` :
+D'abord, **revérifier l'adresse du serveur** : sur la **VM 1**, retaper
+
+```bash
+hostname -I
+```
+
+C'est cette adresse (exemple : `10.0.2.4`) qu'il faut donner au client, même si elle a déjà été notée à
+l'étape 5.
+
+Puis sur la **VM 2**, depuis le dossier `les_fibreux_quartier` :
 
 ```bash
 nano config.ini
 ```
 
-Remplacer la ligne `hote_client = 127.0.0.1` par l'adresse notée à l'étape 5 :
+Remplacer la ligne `hote_client = 127.0.0.1` par l'adresse de la VM 1 :
 
 ```ini
 hote_client = 10.0.2.4
 ```
 
-Enregistrer et quitter : **Ctrl+O**, **Entrée**, **Ctrl+X**.
+Enregistrer le fichier et quitter l'éditeur.
 
 ## Étape 9 : lancer le client (VM 2, en toto)
 

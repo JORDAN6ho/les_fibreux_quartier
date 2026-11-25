@@ -64,10 +64,21 @@ usermod -aG sudo toto
 exit
 ```
 
-Puis **se déconnecter et se reconnecter** (menu en haut à droite → Se déconnecter).
+Les droits sudo ne sont pris en compte qu'après une nouvelle connexion de `toto` :
+
+- **Méthode normale : redémarrer la VM.**
+- **Plus rapide, sans redémarrer :** taper `su - toto` (mot de passe de `toto`). Ce terminal a tout de suite les
+  droits sudo : faire la suite de l'installation dedans.
+
+```bash
+su - toto
+```
 
 > **Vérifier :** l'invite du terminal doit afficher `toto@...$` et pas `root@...#`.
 > Toutes les étapes suivantes se font en `toto`, **jamais en root**.
+>
+> **Sur la VM 2 avec `su - toto` :** ce terminal sert à installer, mais il n'a pas accès à l'affichage. Pour
+> lancer le client (étape 9), ouvrir **un nouveau terminal** depuis le bureau.
 
 ## Étape 5 : installer le serveur (VM 1)
 
@@ -145,9 +156,9 @@ Autre possibilité, sans modifier `config.ini` : `./venv/bin/python client.py --
 
 | Problème | Solution |
 | --- | --- |
-| `toto is not in the sudoers file` | Refaire l'étape 4, sans oublier de se déconnecter puis se reconnecter |
+| `toto is not in the sudoers file` | Refaire l'étape 4, sans oublier de redémarrer la VM ou de taper `su - toto` |
 | PowerShell : `VBoxManage` introuvable | Vérifier l'étape 1 : `cd` dans le dossier de VirtualBox et `.\` devant `VBoxManage.exe` |
-| `could not connect to display` puis `Aborted` | Le client est lancé en root : taper `exit`, vérifier que l'invite est `toto@...$`, relancer |
+| `could not connect to display` puis `Aborted` | Le client est lancé en root, ou dans le terminal du `su - toto` : ouvrir un nouveau terminal depuis le bureau, vérifier que l'invite est `toto@...$`, relancer |
 | Client : « Connexion impossible » | Serveur pas lancé (étape 7), mauvaise adresse dans `config.ini` (étape 8), ou VM pas en « Réseau NAT » (étape 2) |
 | Les deux VM ont l'adresse `10.0.2.15` | Elles sont en « NAT » simple : refaire l'étape 2 |
 | Les deux VM ont la même adresse, mais pas `10.0.2.15` | Même adresse MAC (la même image importée deux fois) : réimporter la VM 2 en générant de nouvelles adresses MAC (étape 0) |
@@ -179,7 +190,7 @@ Images Debian 12 du Disque Commun de l'IUT, VM rangées dans `C:\Temp`, VirtualB
 
 | | Écart | Correction |
 | --- | --- | --- |
-| A | `sudo` refusé : « toto is not in the sudoers file » | `su -`, `usermod -aG sudo toto`, déconnexion et reconnexion (étape 4) |
+| A | `sudo` refusé : « toto is not in the sudoers file » | `su -`, `usermod -aG sudo toto`, puis redémarrage de la VM ou `su - toto` (étape 4) |
 | B | Menu de création du réseau NAT introuvable ; en « NAT » simple, les VM ne se voient pas | Réseau créé avec `VBoxManage natnetwork add` (étape 1), mode « Réseau NAT » (étape 2) |
 | C | Client : « Connexion impossible », il visait `127.0.0.1` | `hote_client` modifié et enregistré dans `config.ini` (étape 8) |
 | D | `bash install.sh client` affiche « Usage : ... » | Argument retapé exactement |
